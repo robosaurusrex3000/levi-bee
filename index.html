@@ -1,0 +1,977 @@
+<title>Levi's Bee Practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Lexend:wght@400;500;600&family=Andika:wght@400;700&display=swap">
+<style>
+:root{
+  --bg:#EAF0F7; --surface:#FFFFFF; --surface-2:#F4F7FB; --ink:#16233F; --muted:#56627A;
+  --line:#CFD8E6; --accent:#F2A900; --accent-ink:#2A1D00; --accent-soft:#FFF3D1;
+  --good:#1F8A5B; --good-soft:#DDF3E8; --bad:#C8453C; --bad-soft:#FBE3E1; --focus:#2F6FE0;
+  --display:"Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Lexend", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --word:"Andika", "Lexend", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#10172A; --surface:#19223A; --surface-2:#212C47; --ink:#E9EEF8; --muted:#A3AEC6;
+    --line:#2E3A58; --accent:#FFBE2E; --accent-ink:#241800; --accent-soft:#3A2F12;
+    --good:#4CC38A; --good-soft:#15352A; --bad:#F07A70; --bad-soft:#3D1F22; --focus:#7FA8FF;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#10172A; --surface:#19223A; --surface-2:#212C47; --ink:#E9EEF8; --muted:#A3AEC6;
+  --line:#2E3A58; --accent:#FFBE2E; --accent-ink:#241800; --accent-soft:#3A2F12;
+  --good:#4CC38A; --good-soft:#15352A; --bad:#F07A70; --bad-soft:#3D1F22; --focus:#7FA8FF;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;padding:0 16px;padding-block:20px 40px}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1,h2{font-family:var(--display);font-weight:800;line-height:1.1;margin:0;text-wrap:balance}
+h1{font-size:2rem}
+h2{font-size:1.35rem}
+p{margin:0}
+.eyebrow{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hex{display:inline-grid;place-items:center;width:44px;height:48px;background:var(--accent);color:var(--accent-ink);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);font-family:var(--display);font-weight:800;font-size:1.3rem;flex:none}
+.brand{display:flex;gap:12px;align-items:center}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:16px}
+fieldset{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+legend{font-weight:600;margin-bottom:10px;padding:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.chip span{display:inline-flex;gap:6px;align-items:baseline;padding:8px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface-2);font-size:.95rem;cursor:pointer}
+.chip small{color:var(--muted);font-variant-numeric:tabular-nums}
+.chip input:checked + span{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chip input:checked + span small{color:var(--accent-ink)}
+.chip input:focus-visible + span{outline:3px solid var(--focus);outline-offset:2px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+label.field{display:flex;flex-direction:column;gap:6px;flex:1 1 220px;font-weight:600;font-size:.95rem}
+select,input[type=range]{font:inherit;color:var(--ink)}
+select{padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface-2);max-width:100%}
+input[type=range]{accent-color:var(--accent);width:100%}
+.hint{color:var(--muted);font-size:.9rem}
+button{font:inherit;cursor:pointer;border:0;border-radius:14px;padding:12px 18px;font-weight:600;color:var(--ink);background:var(--surface-2);border:1.5px solid var(--line);min-height:48px;touch-action:manipulation}
+button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+button:disabled{opacity:.5;cursor:default}
+.btn-main{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-family:var(--display);font-weight:800;font-size:1.3rem;padding:14px 24px}
+.btn-good{background:var(--good);border-color:var(--good);color:#fff}
+.btn-bad{background:var(--bad);border-color:var(--bad);color:#fff}
+.btn-quiet{background:transparent;border-color:transparent;color:var(--muted);min-height:40px;padding:8px 10px}
+.stats{display:flex;gap:18px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.stats b{font-family:var(--display);font-size:1.5rem;display:block;line-height:1}
+
+/* drill */
+.drillbar{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.meter{flex:1;height:10px;border-radius:99px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.count{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+.stage{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:28px 20px;display:flex;flex-direction:column;align-items:center;gap:20px;text-align:center}
+.speaker{width:148px;height:148px;border-radius:50%;background:var(--accent-soft);border:3px solid var(--accent);display:grid;place-items:center;padding:0;color:var(--ink)}
+.speaker svg{width:64px;height:64px}
+.speaker.talking{animation:pulse 1.1s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 14px color-mix(in srgb,var(--accent) 25%,transparent)}}
+@media (prefers-reduced-motion: reduce){.speaker.talking{animation:none;box-shadow:0 0 0 8px color-mix(in srgb,var(--accent) 30%,transparent)}.meter i{transition:none}}
+.status{font-family:var(--display);font-size:1.5rem;font-weight:800;line-height:1.2;min-height:1.8em}
+.turn{background:var(--surface-2);border-radius:14px;padding:12px 16px;font-size:1rem;color:var(--muted);max-width:420px}
+.turn strong{color:var(--ink)}
+.twin{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:440px}
+.reveal-word{font-family:var(--word);font-weight:700;font-size:clamp(2.2rem,9vw,3.4rem);line-height:1.1;word-break:break-word}
+.tiles{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+.tiles span{font-family:var(--word);font-weight:700;font-size:1.35rem;width:2.1rem;height:2.5rem;display:grid;place-items:center;border-radius:8px;background:var(--accent-soft);border:1.5px solid var(--accent);text-transform:uppercase}
+.sentence{color:var(--muted);max-width:44ch}
+.sentence mark{background:transparent;color:var(--ink);font-weight:600;text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:3px;text-underline-offset:3px}
+.big2{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:440px}
+.big2 button{font-family:var(--display);font-weight:800;font-size:1.25rem;min-height:64px}
+
+.wide{width:100%;max-width:440px}
+.speaker.listening{background:var(--good-soft);border-color:var(--good);color:var(--good);animation:pulse-g 1.3s ease-in-out infinite}
+@keyframes pulse-g{50%{box-shadow:0 0 0 14px color-mix(in srgb,var(--good) 22%,transparent)}}
+@media (prefers-reduced-motion: reduce){.speaker.listening{animation:none}}
+.verdict{font-family:var(--display);font-weight:800;font-size:1.6rem;padding:6px 18px;border-radius:999px}
+.verdict.ok{background:var(--good-soft);color:var(--good)}
+.verdict.no{background:var(--bad-soft);color:var(--bad)}
+.heard{color:var(--muted)}
+.heard b{font-family:var(--word);color:var(--bad);letter-spacing:.12em}
+.modenote{font-size:.9rem;color:var(--muted)}
+.miclog{font-family:var(--word);background:var(--surface-2);border-radius:10px;padding:8px 12px;min-height:2.4em}
+
+/* summary */
+.score{font-family:var(--display);font-weight:800;font-size:3rem;line-height:1}
+.misslist{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0;padding:0}
+.misslist li{font-family:var(--word);font-weight:700;font-size:1.1rem;padding:6px 12px;border-radius:10px;background:var(--bad-soft);color:var(--ink)}
+.good-note{background:var(--good-soft);border-radius:12px;padding:12px 16px}
+
+details{border-top:1px solid var(--line);padding-top:14px}
+summary{cursor:pointer;font-weight:600}
+.wordlist{columns:3 9rem;column-gap:16px;margin-top:12px;font-size:.92rem;padding:0;list-style:none}
+.wordlist li{break-inside:avoid;display:flex;justify-content:space-between;gap:6px;padding:2px 0;border-bottom:1px dotted var(--line)}
+.wordlist .r{color:var(--good);font-weight:700}
+.wordlist .w{color:var(--bad);font-weight:700}
+.confirm{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:var(--bad-soft);border-radius:12px;padding:10px 14px}
+.notice{background:var(--bad-soft);border-radius:12px;padding:12px 16px}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="hex" aria-hidden="true">L</div>
+      <div>
+        <p class="eyebrow">Oct. Bee · Fourth Grade</p>
+        <h1>Levi's Bee Practice</h1>
+      </div>
+    </div>
+  </header>
+
+  <div id="noSpeech" class="notice" hidden>This browser can't read words aloud. Try Chrome, Edge, or Safari on a laptop, tablet, or phone.</div>
+
+  <!-- SETUP -->
+  <section id="setup" class="wrap" style="padding:0">
+    <div class="panel">
+      <div class="stats" id="stats"></div>
+      <p class="hint">The word stays hidden until Levi taps <strong>Show the word</strong>. Turn the sound up first.</p>
+    </div>
+
+    <div class="panel">
+      <fieldset>
+        <legend>Which words?</legend>
+        <div class="chips" id="poolChips"></div>
+      </fieldset>
+      <fieldset>
+        <legend>How many this round?</legend>
+        <div class="chips" id="sizeChips"></div>
+      </fieldset>
+      <fieldset>
+        <legend>Order</legend>
+        <div class="chips" id="orderChips"></div>
+      </fieldset>
+      <fieldset>
+        <legend>How is the spelling checked?</legend>
+        <div class="chips" id="modeChips"></div>
+        <p class="modenote" id="modeNote"></p>
+      </fieldset>
+    </div>
+
+    <div class="panel" id="micPanel">
+      <div class="row">
+        <button id="micTest" type="button">Test the microphone</button>
+        <span class="hint">Have Levi say "Blanket, B, L, A, N, K, E, T, blanket." Speak clearly with a small pause between letters.</span>
+      </div>
+      <div class="miclog" id="micLog" aria-live="polite"></div>
+    </div>
+
+    <div class="panel">
+      <div class="row">
+        <label class="field" for="voiceSel">Voice
+          <select id="voiceSel"></select>
+        </label>
+        <label class="field" for="rate">Speaking speed <span class="hint" id="rateLbl"></span>
+          <input type="range" id="rate" min="0.6" max="1.2" step="0.05" value="0.85">
+        </label>
+      </div>
+      <div class="row">
+        <button id="testVoice" type="button">Test the voice</button>
+        <span class="hint">Computer voices sometimes stress a word oddly. If one sounds wrong, try another voice.</span>
+      </div>
+    </div>
+
+    <button id="startBtn" class="btn-main" type="button">Start the bee</button>
+
+    <div class="panel">
+      <details id="parentList">
+        <summary>For parents: full word list and progress</summary>
+        <p class="hint" style="margin-top:8px">✓ means Levi got it right last time, ✗ means he missed it last time.</p>
+        <ul class="wordlist" id="wordlist"></ul>
+        <div class="row" style="margin-top:14px">
+          <button id="resetBtn" type="button">Reset progress</button>
+          <div id="resetConfirm" class="confirm" hidden>
+            <span>Erase all of Levi's results?</span>
+            <button id="resetYes" class="btn-bad" type="button">Erase</button>
+            <button id="resetNo" type="button">Keep</button>
+          </div>
+        </div>
+        <p class="hint" style="margin-top:8px">Progress is saved in this browser only, so practice on the same device to keep it.</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- DRILL -->
+  <section id="drill" class="wrap" style="padding:0" hidden>
+    <div class="drillbar">
+      <div class="meter" aria-hidden="true"><i id="meter"></i></div>
+      <span class="count" id="count"></span>
+      <button id="endBtn" class="btn-quiet" type="button">End round</button>
+    </div>
+
+    <div class="stage">
+      <p class="eyebrow">The Spell Master says</p>
+      <button class="speaker" id="speaker" type="button" aria-label="Hear the word again">
+        <svg id="icoSpeaker" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6"/><path d="M18.3 6.5a7.5 7.5 0 0 1 0 11"/></svg>
+        <svg id="icoMic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><path d="M12 17.5V21"/></svg>
+      </button>
+      <p class="status" id="status" aria-live="polite">Listen…</p>
+
+      <div id="askArea" style="display:flex;flex-direction:column;align-items:center;gap:16px;width:100%">
+        <p class="turn" id="turnText"><strong>Your turn:</strong> say the word, spell it, then say the word again.</p>
+        <div class="twin">
+          <button id="againWord" type="button">Hear the word</button>
+          <button id="againSentence" type="button">Hear the sentence</button>
+        </div>
+        <button id="doneBtn" class="btn-main wide" type="button" hidden>I'm done spelling</button>
+        <button id="micBtn" class="btn-main wide" type="button" hidden>Tap, then spell it</button>
+        <button id="showBtn" class="btn-main wide" type="button" hidden>Show the word</button>
+      </div>
+
+      <div id="revealArea" style="display:flex;flex-direction:column;align-items:center;gap:16px;width:100%" hidden>
+        <div class="verdict" id="verdict" hidden></div>
+        <div class="reveal-word" id="revealWord"></div>
+        <div class="tiles" id="tiles"></div>
+        <p class="heard" id="heard" hidden></p>
+        <p class="sentence" id="sentence"></p>
+        <button id="spellBtn" type="button">Hear it spelled</button>
+        <div id="selfBtns" style="display:flex;flex-direction:column;align-items:center;gap:12px;width:100%">
+          <p class="turn" style="margin-top:4px">Did you spell it right?</p>
+          <div class="big2">
+            <button id="gotIt" class="btn-good" type="button">I got it</button>
+            <button id="missed" class="btn-bad" type="button">I missed it</button>
+          </div>
+        </div>
+        <div id="voiceBtns" style="display:flex;flex-direction:column;align-items:center;gap:10px;width:100%" hidden>
+          <button id="nextBtn" class="btn-main wide" type="button">Next word</button>
+          <button id="misheardBtn" type="button">I spelled it right. It heard me wrong.</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUMMARY -->
+  <section id="summary" class="wrap" style="padding:0" hidden>
+    <div class="panel">
+      <p class="eyebrow">Round finished</p>
+      <div class="score" id="score"></div>
+      <p id="scoreNote"></p>
+      <div id="missBlock" style="display:flex;flex-direction:column;gap:10px">
+        <h2>Words to practice</h2>
+        <ul class="misslist" id="missList"></ul>
+      </div>
+      <div class="row">
+        <button id="redoMissed" class="btn-main" type="button">Practice the missed words</button>
+        <button id="backBtn" type="button">Back to start</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const RAW = [
+`lunar|The lunar eclipse turned the moon a reddish color.
+cellar|We keep extra jars of jam down in the cellar.
+collar|My dog wears a red collar with a little tag.
+corner|Wait for me at the corner of the street.
+danger|The sign warned hikers of danger near the cliff.
+director|The director told the actors where to stand.
+doctor|The doctor listened to my heart.
+dollar|I found a dollar in my jacket pocket.
+tinker|Grandpa likes to tinker with old radios in the garage.
+finger|She pointed her finger at the map.
+honor|It was an honor to carry the flag at the assembly.
+labor|Building the treehouse took a lot of hard labor.
+master|After years of practice, he became a master of chess.
+motor|The boat's motor roared as we sped across the lake.
+ancestor|My ancestor sailed across the ocean long ago.
+checkers|My sister and I play checkers after dinner.
+power|The storm knocked out the power in our neighborhood.
+regular|I would like a regular size lemonade, please.
+sugar|Mom added a spoonful of sugar to the batter.
+overactive|The puppy was so overactive that it would not sit still.
+overbite|The dentist said my overbite could be fixed with braces.
+overboard|A hat blew off the boat and fell overboard.
+overdrive|The team went into overdrive to finish the project on time.
+overestimate|Do not overestimate how much pizza you can eat.
+overhand|The pitcher threw the ball overhand.
+overheat|If the engine gets too hot, it could overheat.
+overpass|The cars drove across the overpass above the highway.
+overreact|Try not to overreact when you lose a game.
+underline|Please underline the title of the book.
+underbrush|A rabbit hid in the thick underbrush.
+underdeveloped|The seedling's roots were underdeveloped, so it could not stand up straight.
+undergo|The old bridge will undergo repairs this summer.
+underhand|She tossed the softball underhand to her little brother.
+underpass|We walked through the underpass beneath the freeway.
+underscore|Type an underscore between the two words.
+underwater|I can hold my breath underwater for ten seconds.
+submarine|The submarine dove deep into the ocean.
+subway|In New York City, many people ride the subway to work.
+overact|The actor began to overact and shout every line.
+children|The children lined up for recess.
+sheep|The farmer counted the sheep in the field.
+elk|A large elk with huge antlers stood in the meadow.
+geese|A flock of geese flew south for the winter.
+jeans|I wore my blue jeans to the park.
+women|Three women ran together in the race.
+moose|A moose is the largest member of the deer family.
+assistant|The teacher's assistant passed out the worksheets.
+consultant|The company hired a consultant to give them advice.
+coolant|The mechanic poured coolant into the car's engine.
+defendant|The defendant stood up when the judge entered the courtroom.
+radiant|Her smile was radiant as she held up the trophy.
+disinfectant|The nurse wiped the table with disinfectant.
+ignorant|He was ignorant of the rules because nobody told him.
+absorbent|An absorbent towel soaks up a spill quickly.
+confident|I feel confident about my spelling test.
+different|Every snowflake has a different shape.
+engineer|The engineer designed a stronger bridge.
+activist|The activist spoke about protecting the ocean.
+cyclist|The cyclist wore a helmet while riding.
+motorist|The motorist stopped to let the ducks cross the road.`,
+`pianist|The pianist played a beautiful song at the concert.
+typist|A fast typist can type sixty words a minute.
+comedian|The comedian made the whole audience laugh.
+electrician|The electrician fixed the lights in our kitchen.
+librarian|The librarian helped me find a book about sharks.
+musician|A musician played the guitar in the park.
+incomplete|My puzzle is incomplete because one piece is missing.
+indirect|Plants near the window get indirect sunlight.
+indent|Remember to indent the first line of each paragraph.
+instead|Let's have tacos instead of pizza tonight.
+include|Be sure to include your name on the paper.
+inexact|The map was inexact, so we got a little lost.
+infamous|The pirate was infamous for stealing treasure.
+outbid|She tried to outbid everyone at the auction.
+outbreak|There was an outbreak of the flu at school.
+outcast|The ugly duckling felt like an outcast.
+outdated|Our old phone is outdated and very slow.
+outdoor|We ate lunch at an outdoor table.
+downfall|Being greedy was the villain's downfall.
+downhill|We raced our bikes downhill.
+downpour|We got soaked in the sudden downpour.
+downstairs|Breakfast is ready downstairs.
+update|Mom had to update the app on her phone.
+upfront|The store asked us to pay upfront.
+uphill|Riding a bike uphill is hard work.
+upwind|Stand upwind of the campfire so the smoke does not get in your eyes.
+decoration|We hung a star decoration on top of the tree.
+abbreviation|We learned the abbreviation for each state name.
+admiration|I have great admiration for firefighters.
+association|The parent association planned a school fair.
+aviation|The museum had old airplanes from the early days of aviation.
+civilization|The ancient Egyptians built a great civilization.
+declaration|The Declaration of Independence was signed in seventeen seventy-six.
+addition|We practiced addition and subtraction in math.
+composition|The class wrote a composition about summer.
+preposition|The word under is a preposition.
+abdominal|Sit-ups make your abdominal muscles stronger.
+admiral|The admiral was in charge of the whole navy fleet.
+rendition|The choir sang a lovely rendition of the song.
+disposal|Put old batteries in the proper disposal bin.
+emotional|The ending of the movie was very emotional.
+environmental|Recycling helps solve environmental problems.
+denial|The boy was in denial about eating the last cookie.
+facial|The clown made funny facial expressions.
+judicial|Judges are part of the judicial branch of government.
+testimonial|The website shows a testimonial from a happy customer.
+additional|We need additional chairs for the party.
+beautifully|The bird sang beautifully in the morning.
+blissfully|The cat slept blissfully in the sun.
+boastfully|He boastfully told everyone he was the fastest runner.
+carefully|Carry the eggs carefully so they do not break.
+cheerfully|She cheerfully waved hello to her neighbors.
+colorfully|The room was colorfully painted with bright stripes.
+educational|The museum trip was fun and educational.
+effortlessly|The eagle glided effortlessly through the sky.
+endlessly|My little cousin talks endlessly about dinosaurs.
+guiltlessly|He guiltlessly ate the last slice because everyone else was full.
+joyfully|The children joyfully opened their presents.
+meaningfully|She looked at me meaningfully, and I knew what she meant.
+playfully|The kitten playfully batted at the string.
+restfully|The baby slept restfully through the night.
+respectfully|Please listen respectfully when others are speaking.
+childishness|His childishness showed when he stomped his feet.
+truthfully|Answer the question truthfully.
+usefully|She spent her free time usefully by cleaning her room.
+powerfully|The waves crashed powerfully against the rocks.
+normal|My temperature is back to normal.
+tremble|My knees began to tremble on the stage.
+puddle|I jumped right into the muddy puddle.
+rebel|The rebel refused to follow the king's orders.
+single|Not a single cookie was left on the plate.
+tunnel|The train roared through the dark tunnel.`,
+`unannounced|My aunt showed up unannounced for dinner.
+unpleasant|The garbage had an unpleasant smell.
+unchain|Unchain your bike before you ride it.
+unfit|The spoiled milk was unfit to drink.
+nonprofit|The animal shelter is a nonprofit group.
+nonmetal|Wood is a nonmetal material.
+recall|I cannot recall where I put my shoes.
+nontoxic|These crayons are nontoxic and safe for kids.
+unwelcome|The ants were unwelcome guests at our picnic.
+reproduce|Plants reproduce by making seeds.
+retrace|Let's retrace our steps to find the lost key.
+uninvited|A raccoon was an uninvited guest at our campsite.
+reapply|Don't forget to reapply sunscreen after swimming.
+likable|The new student is friendly and likable.
+removable|The jacket has a removable hood.
+printable|The teacher gave us a printable worksheet.
+adorable|The baby panda was adorable.
+comfortable|This couch is very comfortable.
+durable|These boots are durable enough for hiking.
+usable|The old bike is still usable.
+invisible|Air is invisible, but we can feel the wind.
+responsible|I am responsible for feeding the dog.
+darkness|The owl hunts in the darkness.
+tidiness|Mom praised my tidiness after I cleaned my room.
+silliness|The clowns' silliness made everyone giggle.
+excitement|The kids buzzed with excitement before the field trip.
+government|The government builds roads and bridges.
+requirement|A helmet is a requirement for riding a scooter.
+loneliness|The lost puppy whimpered with loneliness.
+harmless|The little garden snake is harmless.
+hopeless|The puzzle seemed hopeless until I found the corner piece.
+fearless|The fearless firefighter ran into the smoky building.
+horrible|The storm made a horrible mess of the yard.
+apron|Dad put on an apron before he started cooking.
+button|Press the red button to start the game.
+canyon|The Grand Canyon is very deep.
+certain|Are you certain you locked the door?
+chicken|We had chicken and rice for dinner.
+cardigan|Grandma knitted me a warm cardigan.
+cotton|My T-shirt is made of soft cotton.
+dragon|The knight faced a fire-breathing dragon.
+even|Two, four, and six are even numbers.
+fountain|We tossed pennies into the fountain.
+gallon|We bought a gallon of milk.
+horizon|The sun sank below the horizon.
+listen|Please listen to the directions.
+orphan|The orphan kitten was adopted by a kind family.
+pardon|Pardon me, may I get by?
+pollen|Bees carry pollen from flower to flower.
+prison|The thief was sent to prison.
+siren|We heard the siren of the fire truck.
+swollen|My ankle was swollen after I twisted it.
+driven|Dad has driven this road many times.
+tropical|Parrots live in tropical rain forests.
+animal|The giraffe is the tallest animal.
+arrival|We cheered at Grandpa's arrival.
+trample|Don't trample the flowers in the garden.
+bottle|Fill your water bottle before practice.
+camel|A camel can walk across the desert for days.
+capital|Sacramento is the capital of California.
+couple|I need a couple of pencils.
+swivel|My desk chair can swivel all the way around.
+festival|We ate funnel cake at the summer festival.
+gentle|Be gentle when you hold the baby chick.
+level|We finally beat the next level of the video game.
+national|The bald eagle is our national bird.`,
+`history|We are learning about California history.
+number|Pick a number between one and ten.
+hunger|The lion's hunger made it hunt for food.
+company|My uncle works for a big company.
+window|Open the window to let in fresh air.
+welcome|Welcome to our classroom!
+blanket|When it's cold inside we wrap up in a blanket.
+perhaps|Perhaps it will rain tomorrow.
+service|The restaurant had great service.
+subject|Math is my favorite subject.
+thunder|The thunder was so loud it shook the windows.
+furnish|They will furnish the new house with a couch and beds.
+jersey|He wore his favorite player's jersey to the game.
+mother|My mother makes the best pancakes.
+secret|Can you keep a secret?
+harvest|Farmers harvest pumpkins in the fall.
+winter|It snows in the mountains in winter.
+problem|I solved the math problem on the board.
+chapter|We read one chapter every night.
+nurses|The nurses took care of the patients.
+monster|The monster in the story was actually friendly.
+complete|Complete your homework before you play.
+hundred|There are one hundred cents in a dollar.
+sandwich|I packed a turkey sandwich for lunch.
+surprise|We planned a surprise party for Mom.
+applause|The audience burst into applause.
+although|Although it was raining, we still played outside.
+conflict|The two friends solved their conflict by talking.
+mattress|I got a new mattress for my bed.
+purchase|We will purchase tickets at the gate.
+merchant|The merchant sold spices at the market.
+pumpkin|We carved a pumpkin for Halloween.
+angry|The bear was angry when we woke it up.
+ostrich|The ostrich is a bird that cannot fly.
+punctual|Be punctual and arrive on time.
+address|Write your address on the envelope.
+chestnut|A chestnut fell from the tree.
+luncheon|The ladies met for a luncheon at noon.
+begin|The show will begin at seven o'clock.
+vanish|The magician made the coin vanish.
+bonus|We got a bonus round in the game.
+legal|It is not legal to drive without a license.
+event|The race was the biggest event of the day.
+moment|Wait a moment while I tie my shoe.
+motive|The detective wondered about the thief's motive.
+native|The coyote is native to California.
+suburb|We live in a quiet suburb outside the city.
+mimic|Parrots can mimic human voices.
+paper|Write your name at the top of the paper.
+pilot|The pilot landed the plane safely.
+raven|A black raven sat on the fence.
+rival|Our team beat our biggest rival.
+relish|I like relish on my hot dog.
+silent|The library was silent.
+solar|Solar panels turn sunlight into energy.
+spider|The spider spun a web in the corner.
+super|That was a super fun day!
+virus|A virus can make you sick.
+reuse|We reuse old jars to store buttons.
+restart|If the game freezes, restart it.
+retell|Can you retell the story in your own words?
+resend|Please resend the email because I never got it.
+replace|We need to replace the burned-out light bulb.
+uncork|Grandpa used a tool to uncork the bottle.
+unstuck|We pushed the wagon to get it unstuck from the mud.`
+];
+
+// Build word list (skip duplicates, e.g. "instead" appears on two pages)
+const WORDS = [];
+const seen = new Set();
+RAW.forEach((block, i) => block.split("\n").forEach(line => {
+  const [w, s] = line.split("|");
+  if (!w || seen.has(w)) return;
+  seen.add(w);
+  WORDS.push({ w: w.trim(), s: s.trim(), page: i + 1 });
+}));
+const byWord = Object.fromEntries(WORDS.map(x => [x.w, x]));
+
+// ---------- progress (this browser only) ----------
+const KEY = "levi-bee-progress-v1";
+let progress = {};
+function loadProgress(){
+  try { progress = JSON.parse(localStorage.getItem(KEY) || "null") || null; } catch(e){ progress = null; }
+  if (!progress) progress = { history:{r:1,w:0,last:"r"}, number:{r:1,w:0,last:"r"} }; // checked on the sheet
+}
+function saveProgress(){ try { localStorage.setItem(KEY, JSON.stringify(progress)); } catch(e){} }
+function mark(word, ok){
+  const p = progress[word] || { r:0, w:0, last:null };
+  ok ? p.r++ : p.w++;
+  p.last = ok ? "r" : "w";
+  progress[word] = p; saveProgress();
+}
+loadProgress();
+
+// ---------- setup UI ----------
+const $ = id => document.getElementById(id);
+const POOLS = [
+  { id:"all", label:"All words", fn:() => WORDS },
+  { id:"learning", label:"Not right yet", fn:() => WORDS.filter(x => progress[x.w]?.last !== "r") },
+  { id:"missed", label:"Missed last time", fn:() => WORDS.filter(x => progress[x.w]?.last === "w") },
+  { id:"p1", label:"Page 1", fn:() => WORDS.filter(x => x.page === 1) },
+  { id:"p2", label:"Page 2", fn:() => WORDS.filter(x => x.page === 2) },
+  { id:"p3", label:"Page 3", fn:() => WORDS.filter(x => x.page === 3) },
+  { id:"p4", label:"Page 4", fn:() => WORDS.filter(x => x.page === 4) },
+];
+const SIZES = [["10","10"],["20","20"],["50","50"],["all","All"]];
+const ORDERS = [["shuffle","Mixed up"],["list","List order"]];
+let prefs = { pool:"learning", size:"20", order:"shuffle", voice:"", rate:0.85 };
+try { Object.assign(prefs, JSON.parse(localStorage.getItem(KEY+"-prefs") || "{}")); } catch(e){}
+function savePrefs(){ try { localStorage.setItem(KEY+"-prefs", JSON.stringify(prefs)); } catch(e){} }
+
+function chipGroup(el, name, items, current, onPick){
+  el.innerHTML = "";
+  items.forEach(([val, label, extra]) => {
+    const id = `${name}-${val}`;
+    const wrap = document.createElement("label");
+    wrap.className = "chip"; wrap.htmlFor = id;
+    wrap.innerHTML = `<input type="radio" name="${name}" id="${id}" value="${val}" ${val===current?"checked":""}><span>${label}${extra!=null?` <small>${extra}</small>`:""}</span>`;
+    wrap.querySelector("input").addEventListener("change", () => onPick(val));
+    el.appendChild(wrap);
+  });
+}
+function renderSetup(){
+  const right = WORDS.filter(x => progress[x.w]?.last === "r").length;
+  const miss = WORDS.filter(x => progress[x.w]?.last === "w").length;
+  $("stats").innerHTML = `<div><b>${WORDS.length}</b><span class="hint">words on the list</span></div>
+    <div><b style="color:var(--good)">${right}</b><span class="hint">right last time</span></div>
+    <div><b style="color:var(--bad)">${miss}</b><span class="hint">missed last time</span></div>`;
+  chipGroup($("poolChips"), "pool", POOLS.map(p => [p.id, p.label, p.fn().length]), prefs.pool, v => { prefs.pool=v; savePrefs(); });
+  chipGroup($("sizeChips"), "size", SIZES, prefs.size, v => { prefs.size=v; savePrefs(); });
+  chipGroup($("orderChips"), "order", ORDERS, prefs.order, v => { prefs.order=v; savePrefs(); });
+  $("wordlist").innerHTML = WORDS.map(x => {
+    const l = progress[x.w]?.last;
+    return `<li><span>${x.w}</span>${l==="r"?'<span class="r">✓</span>':l==="w"?'<span class="w">✗</span>':""}</li>`;
+  }).join("");
+}
+
+// ---------- speech ----------
+const synth = window.speechSynthesis;
+if (!synth) { $("noSpeech").hidden = false; }
+let voices = [];
+function pickDefaultVoice(){
+  const prefer = ["Samantha","Google US English","Microsoft Aria","Microsoft Jenny","Allison","Ava","Microsoft Zira"];
+  for (const name of prefer){ const v = voices.find(v => v.name.includes(name)); if (v) return v.name; }
+  return (voices.find(v => v.lang === "en-US") || voices[0] || {}).name || "";
+}
+function loadVoices(){
+  if (!synth) return;
+  voices = synth.getVoices().filter(v => /^en/i.test(v.lang));
+  if (!voices.length) return;
+  if (!prefs.voice || !voices.some(v => v.name === prefs.voice)) prefs.voice = pickDefaultVoice();
+  $("voiceSel").innerHTML = voices.map(v => `<option value="${v.name}" ${v.name===prefs.voice?"selected":""}>${v.name} (${v.lang})</option>`).join("");
+}
+if (synth){ loadVoices(); synth.onvoiceschanged = loadVoices; }
+$("voiceSel").addEventListener("change", e => { prefs.voice = e.target.value; savePrefs(); });
+$("rate").value = prefs.rate;
+const rateLabel = () => $("rateLbl").textContent = prefs.rate < 0.8 ? "(slow)" : prefs.rate > 1 ? "(fast)" : "(normal)";
+rateLabel();
+$("rate").addEventListener("input", e => { prefs.rate = +e.target.value; rateLabel(); savePrefs(); });
+
+const wait = ms => new Promise(r => setTimeout(r, ms));
+function say(text){
+  return new Promise(res => {
+    const u = new SpeechSynthesisUtterance(text);
+    const v = voices.find(v => v.name === prefs.voice); if (v) u.voice = v;
+    u.lang = v?.lang || "en-US"; u.rate = prefs.rate;
+    let done = false; const fin = () => { if (!done){ done = true; res(); } };
+    u.onend = fin; u.onerror = fin;
+    setTimeout(fin, 2500 + text.length * 130 / prefs.rate); // safety net if a browser never fires onend
+    synth.speak(u);
+  });
+}
+let seq = 0;
+// Returns true if every part was spoken, false if something interrupted it
+async function speak(parts){
+  if (!synth) return true;
+  const my = ++seq;
+  synth.cancel(); await wait(80);
+  setSpeaker("talking");
+  for (const p of parts){
+    if (my !== seq) return false;
+    if (typeof p === "number") await wait(p); else await say(p);
+  }
+  if (my !== seq) return false;
+  setSpeaker("");
+  return true;
+}
+function stopSpeech(){ seq++; if (synth) synth.cancel(); setSpeaker(""); }
+function setSpeaker(state){
+  const sp = $("speaker");
+  sp.classList.toggle("talking", state === "talking");
+  sp.classList.toggle("listening", state === "listening");
+  $("icoSpeaker").style.display = state === "listening" ? "none" : "";
+  $("icoMic").style.display = state === "listening" ? "" : "none";
+}
+
+const LETTERS = {a:"ay",b:"bee",c:"see",d:"dee",e:"ee",f:"eff",g:"gee",h:"aitch",i:"eye",j:"jay",k:"kay",l:"el",m:"em",n:"en",o:"oh",p:"pee",q:"cue",r:"are",s:"ess",t:"tee",u:"you",v:"vee",w:"double you",x:"ex",y:"why",z:"zee"};
+const spelledOut = w => [...w.toLowerCase()].map(c => LETTERS[c] || c).join(", ");
+const cap = w => w[0].toUpperCase() + w.slice(1);
+
+$("testVoice").addEventListener("click", () => speak(["Your word is blanket.", 600, "When it's cold inside we wrap up in a blanket.", 600, "Blanket."]));
+
+// ---------- voice recognition ----------
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const SILENCE_MS = 2500;      // stop listening after this much quiet
+const NOTHING_MS = 10000;     // give up if nothing at all is heard
+const MAX_MS = 40000;
+// Spoken letter names the recognizer may write out as words
+const NAME2L = {ay:"a",eh:"a",hey:"a",bee:"b",be:"b",see:"c",sea:"c",si:"c",dee:"d",ee:"e",eff:"f",ef:"f",gee:"g",jee:"g",aitch:"h",eye:"i",jay:"j",kay:"k",el:"l",ell:"l",em:"m",en:"n",oh:"o",owe:"o",pee:"p",pea:"p",cue:"q",queue:"q",are:"r",ar:"r",ess:"s",es:"s",tee:"t",tea:"t",you:"u",vee:"v",ex:"x",why:"y",zee:"z",zed:"z"};
+
+function tokens(text, target){
+  let t = " " + text.replace(/double[\s-]*(you|u)\b/gi, " w ") + " ";
+  t = t.replace(/\b[A-Z]{2,}\b/g, m => m.split("").join(" ")); // "BLANKET" written in capitals = spelled letters
+  t = t.toLowerCase().replace(/'/g, "").replace(/[^a-z]+/g, " ");
+  const raw = t.split(" ").filter(Boolean).map(x => x === target ? x : (NAME2L[x] || x));
+  const out = [];
+  for (let i = 0; i < raw.length; i++){
+    if (raw[i] === "double" && raw[i+1]?.length === 1){ out.push(raw[i+1], raw[i+1]); i++; }
+    else out.push(raw[i]);
+  }
+  return out;
+}
+function candidates(toks, target){
+  const c = []; let run = [];
+  const flush = () => { if (run.length >= 2) c.push(run.join("")); run = []; };
+  toks.forEach(t => { if (t.length === 1) run.push(t); else flush(); }); flush();
+  let a = 0, b = toks.length;
+  while (a < b && toks[a] === target) a++;
+  while (b > a && toks[b-1] === target) b--;
+  if (a < b) c.push(toks.slice(a, b).join(""));
+  else if (toks.filter(t => t === target).length >= 2) c.push(target);
+  return c;
+}
+// alts: array of possible transcripts. Returns {result:"right"|"wrong"|"unclear", heard}
+function grade(alts, target){
+  let heard = null;
+  for (const alt of alts){
+    const c = candidates(tokens(alt, target), target);
+    if (c.includes(target)) return { result:"right" };
+    if (!heard && c.length) heard = c[0];
+  }
+  return heard ? { result:"wrong", heard } : { result:"unclear" };
+}
+function transcriptsFrom(segs){
+  if (!segs.length) return [];
+  const top = segs.map(s => s[0]);
+  const list = [top.join(" ")];
+  segs.forEach((s, i) => s.slice(1).forEach(alt => { const v = top.slice(); v[i] = alt; list.push(v.join(" ")); }));
+  return list;
+}
+
+let rec = null, listenState = null;
+function listen(onDone){
+  abortListening();
+  const st = { segs:[], interim:"", heard:false, start:Date.now(), last:Date.now(), stopped:false, done:false, denied:false, timer:null };
+  listenState = st;
+  const arm = ms => { clearTimeout(st.timer); st.timer = setTimeout(() => { st.stopped = true; try { rec?.stop(); } catch(e){} setTimeout(() => finish(), 1500); }, ms); };
+  const finish = () => {
+    if (st.done || st !== listenState) return;
+    st.done = true; clearTimeout(st.timer);
+    try { rec?.abort(); } catch(e){}
+    const segs = st.segs.slice();
+    if (st.interim.trim()) segs.push([st.interim.trim()]);
+    onDone({ transcripts: transcriptsFrom(segs), denied: st.denied });
+  };
+  st.finish = () => { st.stopped = true; try { rec?.stop(); } catch(e){} setTimeout(finish, 1500); };
+  const startRec = () => {
+    const r = new SR(); rec = r;
+    r.lang = "en-US"; r.continuous = true; r.interimResults = true; r.maxAlternatives = 5;
+    r.onresult = e => {
+      if (st !== listenState) return;
+      st.heard = true; st.last = Date.now(); st.interim = "";
+      for (let i = e.resultIndex; i < e.results.length; i++){
+        const res = e.results[i];
+        if (res.isFinal) st.segs.push(Array.from(res, a => a.transcript));
+        else st.interim += res[0].transcript + " ";
+      }
+      arm(SILENCE_MS);
+    };
+    r.onerror = e => { if (e.error === "not-allowed" || e.error === "service-not-allowed" || e.error === "audio-capture") st.denied = true; };
+    r.onend = () => {
+      if (st !== listenState || st.done) return;
+      if (st.denied) return finish();
+      const now = Date.now();
+      const keepGoing = !st.stopped && now - st.start < MAX_MS &&
+        (st.heard ? now - st.last < SILENCE_MS : now - st.start < NOTHING_MS);
+      if (keepGoing){ try { startRec(); return; } catch(e){} }
+      finish();
+    };
+    try { r.start(); } catch(e){ st.denied = true; finish(); }
+  };
+  arm(NOTHING_MS);
+  startRec();
+}
+function abortListening(){
+  if (listenState){ listenState.done = true; clearTimeout(listenState.timer); }
+  listenState = null;
+  try { rec?.abort(); } catch(e){}
+  rec = null;
+}
+
+$("micTest").addEventListener("click", async () => {
+  if (!SR){ $("micLog").textContent = "Voice checking doesn't work in this browser. Use Chrome on a laptop or computer."; return; }
+  stopSpeech();
+  $("micLog").textContent = "Listening… spell \"blanket\" now.";
+  listen(({ transcripts, denied }) => {
+    if (denied){ $("micLog").textContent = "The microphone is blocked. Allow microphone access for this page in the browser, then try again."; return; }
+    if (!transcripts.length){ $("micLog").textContent = "I didn't hear anything. Check that the right microphone is on and try again."; return; }
+    const g = grade(transcripts, "blanket");
+    $("micLog").textContent = `Heard: "${transcripts[0]}"  →  ${g.result === "right" ? "✓ counted as correct" : g.result === "wrong" ? "✗ counted as " + g.heard.toUpperCase() : "couldn't pick out the letters"}`;
+  });
+});
+
+// ---------- modes ----------
+let voiceReady = !!SR;
+function renderModes(){
+  const items = [["voice", "It listens and checks"], ["self", "Levi checks himself"]];
+  if (!SR) prefs.mode = "self";
+  chipGroup($("modeChips"), "mode", items, prefs.mode || (SR ? "voice" : "self"), v => { prefs.mode = v; savePrefs(); renderModes(); });
+  if (!SR) $("modeChips").querySelector('input[value="voice"]').disabled = true;
+  $("micPanel").hidden = (prefs.mode || "voice") !== "voice" || !SR;
+  $("modeNote").textContent = !SR
+    ? "This browser can't listen for spelling. Open the page in Chrome on a laptop or computer for voice checking."
+    : (prefs.mode || "voice") === "voice"
+      ? "Levi says the word, spells it, and says it again. The page listens and tells him if he's right."
+      : "Levi taps to see the word and marks himself right or wrong.";
+}
+if (!prefs.mode) prefs.mode = SR ? "voice" : "self";
+renderModes();
+let mode = prefs.mode;
+
+// ---------- drill ----------
+let round = [], idx = 0, results = [], retries = 0, advanceTimer = null;
+let wakeLock = null;
+async function keepAwake(){ try { wakeLock = await navigator.wakeLock?.request("screen"); } catch(e){} }
+function releaseAwake(){ try { wakeLock?.release(); } catch(e){} wakeLock = null; }
+
+function show(section){
+  ["setup","drill","summary"].forEach(s => $(s).hidden = s !== section);
+  window.scrollTo(0,0);
+}
+function shuffle(a){ a = a.slice(); for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function clearAdvance(){ clearTimeout(advanceTimer); advanceTimer = null; }
+function setStatus(t){ $("status").textContent = t; }
+
+function startRound(list){
+  if (!list.length) return;
+  round = list; idx = 0; results = [];
+  show("drill"); keepAwake(); present();
+}
+function present(){
+  clearAdvance(); retries = 0;
+  $("count").textContent = `Word ${idx+1} of ${round.length}`;
+  $("meter").style.width = `${(idx/round.length)*100}%`;
+  $("askArea").hidden = false; $("revealArea").hidden = true;
+  $("showBtn").hidden = mode !== "self";
+  $("doneBtn").hidden = true; $("micBtn").hidden = true;
+  readThenAnswer([`Your word is ${round[idx].w}.`, 700, round[idx].s, 700, `${cap(round[idx].w)}.`]);
+}
+// Read something aloud, then (in voice mode) start listening for Levi
+async function readThenAnswer(parts){
+  abortListening(); clearAdvance();
+  $("doneBtn").hidden = true; $("micBtn").hidden = true;
+  setStatus("Listen…");
+  const finished = await speak(parts);
+  if (!finished || $("askArea").hidden) return;
+  if (mode === "voice") startListening();
+  else setStatus("Your turn");
+}
+function startListening(){
+  setSpeaker("listening");
+  setStatus("I'm listening. Your turn!");
+  $("doneBtn").hidden = false; $("micBtn").hidden = true;
+  const myIdx = idx;
+  listen(res => { if (myIdx === idx && !$("askArea").hidden) handleHeard(res); });
+}
+async function handleHeard({ transcripts, denied }){
+  setSpeaker(""); $("doneBtn").hidden = true;
+  if (denied){
+    mode = "self";
+    setStatus("The microphone isn't available");
+    $("turnText").innerHTML = "<strong>Switched to self-check.</strong> Spell it out loud, then tap Show the word.";
+    $("showBtn").hidden = false;
+    return;
+  }
+  const cur = round[idx];
+  const g = transcripts.length ? grade(transcripts, cur.w) : { result:"unclear" };
+  if (g.result === "unclear"){
+    retries++;
+    const msg = transcripts.length ? "I didn't catch the letters." : "I didn't hear anything.";
+    if (retries <= 2){
+      setStatus(msg);
+      const ok = await speak([`${msg} Please say it and spell it again, nice and clearly.`]);
+      if (ok && !$("askArea").hidden) startListening();
+    } else {
+      setStatus(msg);
+      $("micBtn").hidden = false;
+    }
+    return;
+  }
+  reveal(g.result === "right", g.heard);
+}
+function reveal(ok, heard){
+  const cur = round[idx];
+  $("askArea").hidden = true; $("revealArea").hidden = false;
+  $("revealWord").textContent = cur.w;
+  $("tiles").innerHTML = [...cur.w].map(ch => `<span>${esc(ch)}</span>`).join("");
+  const re = new RegExp(`\\b(${cur.w})\\b`, "i");
+  $("sentence").innerHTML = esc(cur.s).replace(re, "<mark>$1</mark>");
+  const voiceMode = mode === "voice" && ok !== null;
+  $("selfBtns").hidden = voiceMode; $("voiceBtns").hidden = !voiceMode;
+  $("verdict").hidden = !voiceMode; $("heard").hidden = true;
+  if (!voiceMode){ setStatus("Check your spelling"); return; }
+  $("verdict").className = "verdict " + (ok ? "ok" : "no");
+  $("verdict").textContent = ok ? "✓ Correct!" : "✗ Not quite";
+  $("misheardBtn").hidden = ok;
+  if (!ok && heard){
+    $("heard").hidden = false;
+    $("heard").innerHTML = `I heard: <b>${esc(heard.toUpperCase().split("").join(" "))}</b>`;
+  }
+  setStatus(ok ? "Great job!" : "Let's learn this one");
+  if (ok){
+    speak(["Correct!"]).then(done => { if (done) advanceTimer = setTimeout(() => answer(true), 900); });
+  } else {
+    speak([`Not quite. ${cur.w} is spelled`, 300, spelledOut(cur.w) + ".", 400, `${cap(cur.w)}.`]);
+  }
+  $("nextBtn").dataset.ok = ok ? "1" : "0";
+  $("nextBtn").focus({ preventScroll:true });
+}
+
+$("speaker").addEventListener("click", () => {
+  if (!$("askArea").hidden) readThenAnswer([round[idx].w]);
+  else speak([round[idx].w]);
+});
+$("againWord").addEventListener("click", () => readThenAnswer([round[idx].w]));
+$("againSentence").addEventListener("click", () => readThenAnswer([round[idx].s]));
+$("doneBtn").addEventListener("click", () => { listenState?.finish?.(); setStatus("Checking…"); });
+$("micBtn").addEventListener("click", () => { retries = 0; startListening(); });
+$("showBtn").addEventListener("click", () => { stopSpeech(); abortListening(); reveal(null); });
+$("spellBtn").addEventListener("click", () => { clearAdvance(); const w = round[idx].w; speak([w + ".", 500, spelledOut(w) + ".", 500, cap(w) + "."]); });
+
+function answer(ok){
+  clearAdvance();
+  const cur = round[idx];
+  mark(cur.w, ok); results.push({ w: cur.w, ok });
+  idx++;
+  if (idx < round.length) present(); else finish();
+}
+$("gotIt").addEventListener("click", () => answer(true));
+$("missed").addEventListener("click", () => answer(false));
+$("nextBtn").addEventListener("click", () => answer($("nextBtn").dataset.ok === "1"));
+$("misheardBtn").addEventListener("click", () => answer(true));
+$("endBtn").addEventListener("click", () => { clearAdvance(); stopSpeech(); abortListening(); results.length ? finish() : backToStart(); });
+
+function finish(){
+  stopSpeech(); abortListening(); releaseAwake();
+  const right = results.filter(r => r.ok).length;
+  const missed = results.filter(r => !r.ok).map(r => r.w);
+  $("score").textContent = `${right} of ${results.length}`;
+  $("scoreNote").innerHTML = missed.length === 0
+    ? `<span class="good-note" style="display:inline-block">Every word right. Nice work, Levi!</span>`
+    : `${right} spelled right. Go over the words below, then try them again.`;
+  $("missBlock").hidden = missed.length === 0;
+  $("missList").innerHTML = missed.map(w => `<li>${esc(w)}</li>`).join("");
+  $("redoMissed").hidden = missed.length === 0;
+  $("redoMissed").onclick = () => { unlockSpeech(); startRound(shuffle(missed.map(w => byWord[w]))); };
+  show("summary");
+}
+function backToStart(){ stopSpeech(); abortListening(); releaseAwake(); renderSetup(); renderModes(); show("setup"); }
+$("backBtn").addEventListener("click", backToStart);
+
+// A short silent utterance inside a tap unlocks speech on iPhone and iPad
+function unlockSpeech(){ if (synth){ const u = new SpeechSynthesisUtterance(" "); u.volume = 0; synth.speak(u); } }
+
+$("startBtn").addEventListener("click", async () => {
+  let list = POOLS.find(p => p.id === prefs.pool).fn();
+  if (!list.length){
+    $("startBtn").textContent = prefs.pool === "missed" ? "No missed words yet. Pick another set." : "Nothing left here. Pick another set.";
+    setTimeout(() => $("startBtn").textContent = "Start the bee", 2600);
+    return;
+  }
+  if (prefs.order === "shuffle") list = shuffle(list);
+  if (prefs.size !== "all") list = list.slice(0, +prefs.size);
+  unlockSpeech();
+  mode = prefs.mode;
+  $("turnText").innerHTML = mode === "voice"
+    ? "<strong>Your turn:</strong> say the word, spell it, then say the word again. Speak clearly!"
+    : "<strong>Your turn:</strong> say the word, spell it, then say the word again.";
+  if (mode === "voice"){
+    // Ask for the microphone once, up front
+    try {
+      const s = await navigator.mediaDevices.getUserMedia({ audio:true });
+      s.getTracks().forEach(t => t.stop());
+    } catch(e){
+      mode = "self";
+      $("turnText").innerHTML = "<strong>The microphone isn't available here, so Levi checks himself.</strong> Spell it out loud, then tap Show the word.";
+    }
+  }
+  startRound(list);
+});
+
+$("resetBtn").addEventListener("click", () => $("resetConfirm").hidden = false);
+$("resetNo").addEventListener("click", () => $("resetConfirm").hidden = true);
+$("resetYes").addEventListener("click", () => {
+  try { localStorage.removeItem(KEY); } catch(e){}
+  loadProgress(); $("resetConfirm").hidden = true; renderSetup();
+});
+
+renderSetup();
+</script>
