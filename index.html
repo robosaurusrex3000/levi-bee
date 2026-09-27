@@ -155,6 +155,10 @@ summary{cursor:pointer;font-weight:600}
     </div>
 
     <div class="panel" id="micPanel">
+      <label class="field" for="pause">Wait between letters: <span id="pauseLbl"></span>
+        <input type="range" id="pause" min="3" max="12" step="1" value="6">
+      </label>
+      <p class="hint">It stops listening after this much quiet. Levi can tap "I'm done spelling" to finish sooner.</p>
       <div class="row">
         <button id="micTest" type="button">Test the microphone</button>
         <span class="hint">Have Levi say "Blanket, B, L, A, N, K, E, T, blanket." Speak clearly with a small pause between letters.</span>
@@ -668,9 +672,9 @@ $("testVoice").addEventListener("click", () => speak(["Your word is blanket.", 6
 
 // ---------- voice recognition ----------
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-const SILENCE_MS = 2500;      // stop listening after this much quiet
-const NOTHING_MS = 10000;     // give up if nothing at all is heard
-const MAX_MS = 40000;
+const pauseMs = () => (prefs.pause || 6) * 1000;   // quiet time allowed between letters
+const nothingMs = () => Math.max(12000, pauseMs() + 6000); // give up if nothing at all is heard
+const MAX_MS = 120000;
 // Spoken letter names the recognizer may write out as words
 const NAME2L = {ay:"a",eh:"a",hey:"a",bee:"b",be:"b",see:"c",sea:"c",si:"c",dee:"d",ee:"e",eff:"f",ef:"f",gee:"g",jee:"g",aitch:"h",eye:"i",jay:"j",kay:"k",el:"l",ell:"l",em:"m",en:"n",oh:"o",owe:"o",pee:"p",pea:"p",cue:"q",queue:"q",are:"r",ar:"r",ess:"s",es:"s",tee:"t",tea:"t",you:"u",vee:"v",ex:"x",why:"y",zee:"z",zed:"z"};
 
@@ -741,21 +745,22 @@ function listen(onDone){
         if (res.isFinal) st.segs.push(Array.from(res, a => a.transcript));
         else st.interim += res[0].transcript + " ";
       }
-      arm(SILENCE_MS);
+      arm(pauseMs());
     };
     r.onerror = e => { if (e.error === "not-allowed" || e.error === "service-not-allowed" || e.error === "audio-capture") st.denied = true; };
     r.onend = () => {
       if (st !== listenState || st.done) return;
       if (st.denied) return finish();
-      const now = Date.now();
-      const keepGoing = !st.stopped && now - st.start < MAX_MS &&
-        (st.heard ? now - st.last < SILENCE_MS : now - st.start < NOTHING_MS);
-      if (keepGoing){ try { startRec(); return; } catch(e){} }
+      // Chrome ends a listening session on its own after a short pause.
+      // Keep what it heard so far and quietly start listening again,
+      // until the pause timer (or "I'm done spelling") says he's finished.
+      if (st.interim.trim()){ st.segs.push([st.interim.trim()]); st.interim = ""; }
+      if (!st.stopped && Date.now() - st.start < MAX_MS){ try { startRec(); return; } catch(e){} }
       finish();
     };
     try { r.start(); } catch(e){ st.denied = true; finish(); }
   };
-  arm(NOTHING_MS);
+  arm(nothingMs());
   startRec();
 }
 function abortListening(){
@@ -766,16 +771,23 @@ function abortListening(){
 }
 
 $("micTest").addEventListener("click", async () => {
+  if (listenState && !listenState.done){ listenState.finish(); $("micLog").textContent = "Checking…"; return; }
   if (!SR){ $("micLog").textContent = "Voice checking doesn't work in this browser. Use Chrome on a laptop or computer."; return; }
   stopSpeech();
-  $("micLog").textContent = "Listening… spell \"blanket\" now.";
+  $("micTest").textContent = "Done spelling";
+  $("micLog").textContent = `Listening… spell "blanket" now. It stops after ${prefs.pause || 6} seconds of quiet.`;
   listen(({ transcripts, denied }) => {
+    $("micTest").textContent = "Test the microphone";
     if (denied){ $("micLog").textContent = "The microphone is blocked. Allow microphone access for this page in the browser, then try again."; return; }
     if (!transcripts.length){ $("micLog").textContent = "I didn't hear anything. Check that the right microphone is on and try again."; return; }
     const g = grade(transcripts, "blanket");
     $("micLog").textContent = `Heard: "${transcripts[0]}"  →  ${g.result === "right" ? "✓ counted as correct" : g.result === "wrong" ? "✗ counted as " + g.heard.toUpperCase() : "couldn't pick out the letters"}`;
   });
 });
+
+const pauseLabel = () => $("pauseLbl").textContent = `${prefs.pause || 6} seconds`;
+$("pause").value = prefs.pause || 6; pauseLabel();
+$("pause").addEventListener("input", e => { prefs.pause = +e.target.value; pauseLabel(); savePrefs(); });
 
 // ---------- modes ----------
 let voiceReady = !!SR;
