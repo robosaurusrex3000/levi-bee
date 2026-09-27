@@ -711,40 +711,61 @@ function grade(alts, target){
   }
   return heard ? { result:"wrong", heard } : { result:"unclear" };
 }
-function transcriptsFrom(segs){
-  if (!segs.length) return [];
-  const top = segs.map(s => s[0]);
-  const list = [top.join(" ")];
-  segs.forEach((s, i) => s.slice(1).forEach(alt => { const v = top.slice(); v[i] = alt; list.push(v.join(" ")); }));
-  return list;
+const squash = t => t.toLowerCase().replace(/[^a-z]/g, "");
+// Some versions of Chrome (especially on phones and tablets) report the same
+// words over and over as they grow: "p", "p l", "p l a"... These helpers build
+// a few readings of what was heard; if ANY reading is the right spelling, it counts.
+function growOnly(list){            // keep only the longest version of a growing phrase
+  const out = [];
+  list.forEach(t => {
+    const q = squash(t), prev = out.length ? squash(out[out.length-1]) : "";
+    if (prev && q.length > prev.length && q.startsWith(prev)) out[out.length-1] = t; else out.push(t);
+  });
+  return out;
+}
+function noRepeats(list){           // also drop pieces reported twice in a row
+  return growOnly(list).filter((t, i, arr) => i === 0 || squash(t) !== squash(arr[i-1]));
+}
+// sessions: array of sessions; each session = array of results; each result = [alt0, alt1, ...]
+function transcriptsFrom(sessions){
+  const sess = sessions.filter(r => r.length);
+  if (!sess.length) return [];
+  const list = new Set();
+  const build = (tops, fn) => tops.map(t => fn(t).join(" ")).join(" ");
+  const tops = sess.map(r => r.map(x => x[0]));
+  [noRepeats, growOnly, t => t, t => t.slice(-1)].forEach(fn => {
+    list.add(build(tops, fn));
+    sess.forEach((r, si) => r.forEach((res, ri) => res.slice(1).forEach(alt => {
+      const v = tops.map(t => t.slice()); v[si][ri] = alt; list.add(build(v, fn));
+    })));
+  });
+  return [...list].filter(t => t.trim());
 }
 
 let rec = null, listenState = null;
-function listen(onDone){
+function listen(onDone, onReady){
   abortListening();
-  const st = { segs:[], interim:"", heard:false, start:Date.now(), last:Date.now(), stopped:false, done:false, denied:false, timer:null };
+  const st = { sessions:[], heard:false, start:Date.now(), stopped:false, done:false, denied:false, timer:null, ready:false };
   listenState = st;
-  const arm = ms => { clearTimeout(st.timer); st.timer = setTimeout(() => { st.stopped = true; try { rec?.stop(); } catch(e){} setTimeout(() => finish(), 1500); }, ms); };
+  const arm = ms => { clearTimeout(st.timer); st.timer = setTimeout(() => st.finish(), ms); };
   const finish = () => {
     if (st.done || st !== listenState) return;
     st.done = true; clearTimeout(st.timer);
     try { rec?.abort(); } catch(e){}
-    const segs = st.segs.slice();
-    if (st.interim.trim()) segs.push([st.interim.trim()]);
-    onDone({ transcripts: transcriptsFrom(segs), denied: st.denied });
+    onDone({ transcripts: transcriptsFrom(st.sessions), denied: st.denied });
   };
-  st.finish = () => { st.stopped = true; try { rec?.stop(); } catch(e){} setTimeout(finish, 1500); };
+  st.finish = () => { if (st.stopped) return; st.stopped = true; try { rec?.stop(); } catch(e){} setTimeout(finish, 1500); };
   const startRec = () => {
     const r = new SR(); rec = r;
+    const mine = []; st.sessions.push(mine);
     r.lang = "en-US"; r.continuous = true; r.interimResults = true; r.maxAlternatives = 5;
+    r.onaudiostart = () => { if (!st.ready){ st.ready = true; onReady?.(); } };
     r.onresult = e => {
       if (st !== listenState) return;
-      st.heard = true; st.last = Date.now(); st.interim = "";
-      for (let i = e.resultIndex; i < e.results.length; i++){
-        const res = e.results[i];
-        if (res.isFinal) st.segs.push(Array.from(res, a => a.transcript));
-        else st.interim += res[0].transcript + " ";
-      }
+      // Keep this session's full, latest list of results (not just the new ones)
+      mine.length = 0;
+      for (let i = 0; i < e.results.length; i++) mine.push(Array.from(e.results[i], a => a.transcript));
+      st.heard = true;
       arm(pauseMs());
     };
     r.onerror = e => { if (e.error === "not-allowed" || e.error === "service-not-allowed" || e.error === "audio-capture") st.denied = true; };
@@ -752,9 +773,8 @@ function listen(onDone){
       if (st !== listenState || st.done) return;
       if (st.denied) return finish();
       // Chrome ends a listening session on its own after a short pause.
-      // Keep what it heard so far and quietly start listening again,
-      // until the pause timer (or "I'm done spelling") says he's finished.
-      if (st.interim.trim()){ st.segs.push([st.interim.trim()]); st.interim = ""; }
+      // Keep what it heard and quietly listen again until the pause timer
+      // (or "I'm done spelling") says he's finished.
       if (!st.stopped && Date.now() - st.start < MAX_MS){ try { startRec(); return; } catch(e){} }
       finish();
     };
@@ -775,14 +795,14 @@ $("micTest").addEventListener("click", async () => {
   if (!SR){ $("micLog").textContent = "Voice checking doesn't work in this browser. Use Chrome on a laptop or computer."; return; }
   stopSpeech();
   $("micTest").textContent = "Done spelling";
-  $("micLog").textContent = `Listening… spell "blanket" now. It stops after ${prefs.pause || 6} seconds of quiet.`;
+  $("micLog").textContent = "Get ready…";
   listen(({ transcripts, denied }) => {
     $("micTest").textContent = "Test the microphone";
     if (denied){ $("micLog").textContent = "The microphone is blocked. Allow microphone access for this page in the browser, then try again."; return; }
     if (!transcripts.length){ $("micLog").textContent = "I didn't hear anything. Check that the right microphone is on and try again."; return; }
     const g = grade(transcripts, "blanket");
     $("micLog").textContent = `Heard: "${transcripts[0]}"  →  ${g.result === "right" ? "✓ counted as correct" : g.result === "wrong" ? "✗ counted as " + g.heard.toUpperCase() : "couldn't pick out the letters"}`;
-  });
+  }, () => { $("micLog").textContent = `Go ahead! Say "blanket", spell it, and say it again. It stops after ${prefs.pause || 6} seconds of quiet.`; });
 });
 
 const pauseLabel = () => $("pauseLbl").textContent = `${prefs.pause || 6} seconds`;
@@ -847,11 +867,11 @@ async function readThenAnswer(parts){
   else setStatus("Your turn");
 }
 function startListening(){
-  setSpeaker("listening");
-  setStatus("I'm listening. Your turn!");
+  setStatus("Get ready…");
   $("doneBtn").hidden = false; $("micBtn").hidden = true;
   const myIdx = idx;
-  listen(res => { if (myIdx === idx && !$("askArea").hidden) handleHeard(res); });
+  listen(res => { if (myIdx === idx && !$("askArea").hidden) handleHeard(res); },
+         () => { if (myIdx === idx && !$("askArea").hidden){ setSpeaker("listening"); setStatus("Go ahead! I'm listening."); } });
 }
 async function handleHeard({ transcripts, denied }){
   setSpeaker(""); $("doneBtn").hidden = true;
