@@ -1,3 +1,8 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Levi's Bee Practice</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,8 +31,13 @@
   --good:#4CC38A; --good-soft:#15352A; --bad:#F07A70; --bad-soft:#3D1F22; --focus:#7FA8FF;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0}
+.panel > label.field{flex:none}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;padding:0 16px;padding-block:20px 40px}
 .wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+#drill,#summary{display:flex;flex-direction:column;gap:20px}
+#drill[hidden],#summary[hidden],#setup[hidden]{display:none}
 h1,h2{font-family:var(--display);font-weight:800;line-height:1.1;margin:0;text-wrap:balance}
 h1{font-size:2rem}
 h2{font-size:1.35rem}
@@ -98,6 +108,33 @@ button:disabled{opacity:.5;cursor:default}
 .modenote{font-size:.9rem;color:var(--muted)}
 .miclog{font-family:var(--word);background:var(--surface-2);border-radius:10px;padding:8px 12px;min-height:2.4em}
 
+/* list tabs */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:5px}
+.tabs button{min-height:44px;border:0;background:transparent;border-radius:10px;display:flex;flex-direction:column;align-items:flex-start;line-height:1.15;padding:6px 14px}
+.tabs button small{font-weight:400;color:var(--muted);font-size:.78rem}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+.tabs button[aria-selected="true"] small{color:var(--accent-ink)}
+
+/* layout */
+.setup-grid{display:grid;gap:20px;grid-template-columns:1fr}
+.col{display:flex;flex-direction:column;gap:20px;min-width:0}
+.pair{display:grid;gap:16px;grid-template-columns:1fr}
+.stage-left,.stage-right{display:flex;flex-direction:column;align-items:center;gap:18px;width:100%;min-width:0}
+@media (min-width: 900px){
+  .wrap{max-width:1160px}
+  .setup-grid{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);align-items:start}
+  .pair{grid-template-columns:1fr 1fr}
+  #setup .btn-main{font-size:1.5rem;padding:18px 24px}
+  .stage{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);align-items:center;gap:40px;padding:40px 44px;min-height:min(540px,calc(100vh - 190px))}
+  .stage-left{border-right:1px solid var(--line);padding-right:40px;align-self:stretch;justify-content:center}
+  .speaker{width:190px;height:190px}
+  .speaker svg{width:84px;height:84px}
+  .status{font-size:1.9rem}
+  .reveal-word{font-size:3.6rem}
+  .tiles span{width:2.5rem;height:2.9rem;font-size:1.55rem}
+  #summary .panel{max-width:760px}
+}
+
 /* summary */
 .score{font-family:var(--display);font-weight:800;font-size:3rem;line-height:1}
 .misslist{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0;padding:0}
@@ -113,96 +150,108 @@ summary{cursor:pointer;font-weight:600}
 .confirm{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:var(--bad-soft);border-radius:12px;padding:10px 14px}
 .notice{background:var(--bad-soft);border-radius:12px;padding:12px 16px}
 </style>
+</head>
+<body>
+
 
 <div class="wrap">
   <header class="top">
     <div class="brand">
       <div class="hex" aria-hidden="true">L</div>
       <div>
-        <p class="eyebrow">Oct. Bee · Fourth Grade</p>
+        <p class="eyebrow" id="eyebrow">Oct. Bee · Fourth Grade</p>
         <h1>Levi's Bee Practice</h1>
       </div>
     </div>
+    <div class="tabs" id="listTabs" role="tablist" aria-label="Word lists" hidden></div>
   </header>
 
   <div id="noSpeech" class="notice" hidden>This browser can't read words aloud. Try Chrome, Edge, or Safari on a laptop, tablet, or phone.</div>
 
   <!-- SETUP -->
-  <section id="setup" class="wrap" style="padding:0">
-    <div class="panel">
-      <div class="stats" id="stats"></div>
-      <p class="hint">The word stays hidden until Levi taps <strong>Show the word</strong>. Turn the sound up first.</p>
-    </div>
-
-    <div class="panel">
-      <fieldset>
-        <legend>Which words?</legend>
-        <div class="chips" id="poolChips"></div>
-      </fieldset>
-      <fieldset>
-        <legend>How many this round?</legend>
-        <div class="chips" id="sizeChips"></div>
-      </fieldset>
-      <fieldset>
-        <legend>Order</legend>
-        <div class="chips" id="orderChips"></div>
-      </fieldset>
-      <fieldset>
-        <legend>How is the spelling checked?</legend>
-        <div class="chips" id="modeChips"></div>
-        <p class="modenote" id="modeNote"></p>
-      </fieldset>
-    </div>
-
-    <div class="panel" id="micPanel">
-      <label class="field" for="pause">Wait between letters: <span id="pauseLbl"></span>
-        <input type="range" id="pause" min="3" max="12" step="1" value="6">
-      </label>
-      <p class="hint">It stops listening after this much quiet. Levi can tap "I'm done spelling" to finish sooner.</p>
-      <div class="row">
-        <button id="micTest" type="button">Test the microphone</button>
-        <span class="hint">Have Levi say "Blanket, B, L, A, N, K, E, T, blanket." Speak clearly with a small pause between letters.</span>
+  <section id="setup" class="setup-grid">
+    <div class="col">
+      <div class="panel">
+        <div class="stats" id="stats"></div>
+        <p class="hint" id="statsNote"></p>
       </div>
-      <div class="miclog" id="micLog" aria-live="polite"></div>
-    </div>
 
-    <div class="panel">
-      <div class="row">
-        <label class="field" for="voiceSel">Voice
-          <select id="voiceSel"></select>
-        </label>
-        <label class="field" for="rate">Speaking speed <span class="hint" id="rateLbl"></span>
-          <input type="range" id="rate" min="0.6" max="1.2" step="0.05" value="0.85">
-        </label>
-      </div>
-      <div class="row">
-        <button id="testVoice" type="button">Test the voice</button>
-        <span class="hint">Computer voices sometimes stress a word oddly. If one sounds wrong, try another voice.</span>
-      </div>
-    </div>
-
-    <button id="startBtn" class="btn-main" type="button">Start the bee</button>
-
-    <div class="panel">
-      <details id="parentList">
-        <summary>For parents: full word list and progress</summary>
-        <p class="hint" style="margin-top:8px">✓ means Levi got it right last time, ✗ means he missed it last time.</p>
-        <ul class="wordlist" id="wordlist"></ul>
-        <div class="row" style="margin-top:14px">
-          <button id="resetBtn" type="button">Reset progress</button>
-          <div id="resetConfirm" class="confirm" hidden>
-            <span>Erase all of Levi's results?</span>
-            <button id="resetYes" class="btn-bad" type="button">Erase</button>
-            <button id="resetNo" type="button">Keep</button>
-          </div>
+      <div class="panel">
+        <fieldset>
+          <legend>Which words?</legend>
+          <div class="chips" id="poolChips"></div>
+        </fieldset>
+        <div class="pair">
+          <fieldset>
+            <legend>How many this round?</legend>
+            <div class="chips" id="sizeChips"></div>
+          </fieldset>
+          <fieldset>
+            <legend>Order</legend>
+            <div class="chips" id="orderChips"></div>
+          </fieldset>
         </div>
-        <p class="hint" style="margin-top:8px">Progress is saved in this browser only, so practice on the same device to keep it.</p>
-      </details>
+        <fieldset>
+          <legend>How is the spelling checked?</legend>
+          <div class="chips" id="modeChips"></div>
+          <p class="modenote" id="modeNote"></p>
+        </fieldset>
+      </div>
+
+      <button id="startBtn" class="btn-main" type="button">Start the bee</button>
+    </div>
+
+    <div class="col">
+      <div class="panel" id="micPanel">
+        <h2>Microphone</h2>
+        <label class="field" for="pause">Wait between letters: <span id="pauseLbl"></span>
+          <input type="range" id="pause" min="3" max="12" step="1" value="6">
+        </label>
+        <p class="hint">It stops listening after this much quiet. Levi can press "I'm done spelling" to finish sooner.</p>
+        <div class="row">
+          <button id="micTest" type="button">Test the microphone</button>
+          <span class="hint">Say "Blanket," spell it with a small pause between letters, then say "Blanket" again.</span>
+        </div>
+        <div class="miclog" id="micLog" aria-live="polite"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Voice</h2>
+        <div class="row">
+          <label class="field" for="voiceSel">Voice
+            <select id="voiceSel"></select>
+          </label>
+          <label class="field" for="rate">Speaking speed <span class="hint" id="rateLbl"></span>
+            <input type="range" id="rate" min="0.6" max="1.2" step="0.05" value="0.85">
+          </label>
+        </div>
+        <div class="row">
+          <button id="testVoice" type="button">Test the voice</button>
+          <span class="hint">If a word sounds odd, try another voice.</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <details id="parentList">
+          <summary id="parentSummary">For parents: word list and results</summary>
+          <p class="hint" style="margin-top:8px">✓ means Levi got it right last time, ✗ means he missed it last time.</p>
+          <ul class="wordlist" id="wordlist"></ul>
+          <div class="row" style="margin-top:14px">
+            <button id="resetBtn" type="button">Clear results for this list</button>
+            <div id="resetConfirm" class="confirm" hidden>
+              <span>Erase Levi's results for this list?</span>
+              <button id="resetYes" class="btn-bad" type="button">Erase</button>
+              <button id="resetNo" type="button">Keep</button>
+            </div>
+          </div>
+          <p class="hint" style="margin-top:8px">Results are saved in this browser only, so practice on the same computer to keep them.</p>
+        </details>
+      </div>
     </div>
   </section>
 
   <!-- DRILL -->
-  <section id="drill" class="wrap" style="padding:0" hidden>
+  <section id="drill" hidden>
     <div class="drillbar">
       <div class="meter" aria-hidden="true"><i id="meter"></i></div>
       <span class="count" id="count"></span>
@@ -210,13 +259,15 @@ summary{cursor:pointer;font-weight:600}
     </div>
 
     <div class="stage">
+      <div class="stage-left">
       <p class="eyebrow">The Spell Master says</p>
       <button class="speaker" id="speaker" type="button" aria-label="Hear the word again">
         <svg id="icoSpeaker" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6"/><path d="M18.3 6.5a7.5 7.5 0 0 1 0 11"/></svg>
         <svg id="icoMic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><path d="M12 17.5V21"/></svg>
       </button>
       <p class="status" id="status" aria-live="polite">Listen…</p>
-
+      </div>
+      <div class="stage-right">
       <div id="askArea" style="display:flex;flex-direction:column;align-items:center;gap:16px;width:100%">
         <p class="turn" id="turnText"><strong>Your turn:</strong> say the word, spell it, then say the word again.</p>
         <div class="twin">
@@ -247,11 +298,12 @@ summary{cursor:pointer;font-weight:600}
           <button id="misheardBtn" type="button">I spelled it right. It heard me wrong.</button>
         </div>
       </div>
+      </div>
     </div>
   </section>
 
   <!-- SUMMARY -->
-  <section id="summary" class="wrap" style="padding:0" hidden>
+  <section id="summary" hidden>
     <div class="panel">
       <p class="eyebrow">Round finished</p>
       <div class="score" id="score"></div>
@@ -535,49 +587,100 @@ uncork|Grandpa used a tool to uncork the bottle.
 unstuck|We pushed the wagon to get it unstuck from the mud.`
 ];
 
-// Build word list (skip duplicates, e.g. "instead" appears on two pages)
-const WORDS = [];
+// Build the bee list (skip duplicates, e.g. "instead" appears on two pages)
+const BEE_WORDS = [];
 const seen = new Set();
 RAW.forEach((block, i) => block.split("\n").forEach(line => {
   const [w, s] = line.split("|");
   if (!w || seen.has(w)) return;
   seen.add(w);
-  WORDS.push({ w: w.trim(), s: s.trim(), page: i + 1 });
+  BEE_WORDS.push({ w: w.trim(), s: s.trim(), page: i + 1 });
 }));
-const byWord = Object.fromEntries(WORDS.map(x => [x.w, x]));
+
+// Weekly class spelling lists: { id, name, words: "word|sentence" lines }
+// A "*" before a word marks it as a challenge word.
+const WEEKLY = [
+  { id:"wk-2026-09-28", name:"Sept. 28-Oct. 2", words:`
+size|What size shoe do you wear?
+visit|We will visit Grandma this weekend.
+polite|It is polite to say please and thank you.
+deny|The boy tried to deny that he ate the last cookie.
+pride|She felt great pride when she finished the race.
+style|I like the style of your new haircut.
+finger|He got blue paint on his finger.
+delight|The puppy wagged its tail with delight.
+wildlife|We saw lots of wildlife at the national park.
+drive|Mom will drive us to school.
+liquid|Water is a liquid.
+kitchen|Dad is cooking dinner in the kitchen.
+pilot|The pilot flew the plane over the mountains.
+twilight|The first stars came out at twilight.
+rely|You can rely on me to help.
+type|I learned to type on the computer.
+breath|Take a deep breath before you start.
+reason|What is the reason you were late?
+*inning|Our team scored two runs in the last inning.
+*surprise|The birthday present was a big surprise.` },
+];
+
+const LISTS = [
+  { id:"bee", tab:"Spelling Bee", eyebrow:"Oct. Bee · Fourth Grade", start:"Start the bee", words:BEE_WORDS, pages:4 },
+  ...WEEKLY.map(wk => ({
+    id: wk.id, tab: wk.name, eyebrow: `Weekly spelling · ${wk.name}`, start: "Start practice",
+    words: wk.words.trim().split("\n").map(l => { const [w, s] = l.split("|"); const c = w.trim().startsWith("*"); return { w: w.trim().replace(/^\*/, ""), s: s.trim(), challenge: c }; }),
+    pages: 0
+  }))
+];
+const $ = id => document.getElementById(id);
+let prefs = { list:"bee", pool:"all", size:"20", order:"shuffle", voice:"", rate:0.85 };
+const KEY = "levi-bee-progress-v1";
+try { Object.assign(prefs, JSON.parse(localStorage.getItem(KEY+"-prefs") || "{}")); } catch(e){}
+function savePrefs(){ try { localStorage.setItem(KEY+"-prefs", JSON.stringify(prefs)); } catch(e){} }
+let list = LISTS.find(l => l.id === prefs.list) || LISTS[0];
+let WORDS = list.words;
 
 // ---------- progress (this browser only) ----------
-const KEY = "levi-bee-progress-v1";
+// Saved per list as "listId:word"
 let progress = {};
+const pk = w => `${list.id}:${w}`;
+const last = w => progress[pk(w)]?.last;
 function loadProgress(){
-  try { progress = JSON.parse(localStorage.getItem(KEY) || "null") || null; } catch(e){ progress = null; }
-  if (!progress) progress = { history:{r:1,w:0,last:"r"}, number:{r:1,w:0,last:"r"} }; // checked on the sheet
+  try { progress = JSON.parse(localStorage.getItem(KEY) || "null") || {}; } catch(e){ progress = {}; }
+  // Older versions saved bee words without a list name and pre-marked two words
+  let changed = false;
+  for (const k of Object.keys(progress)){
+    if (!k.includes(":")){
+      const v = progress[k]; delete progress[k]; changed = true;
+      if (!(k === "history" || k === "number") || v.r + v.w > 1) progress["bee:" + k] = v;
+    }
+  }
+  if (changed) saveProgress();
 }
 function saveProgress(){ try { localStorage.setItem(KEY, JSON.stringify(progress)); } catch(e){} }
 function mark(word, ok){
-  const p = progress[word] || { r:0, w:0, last:null };
+  const p = progress[pk(word)] || { r:0, w:0, last:null };
   ok ? p.r++ : p.w++;
   p.last = ok ? "r" : "w";
-  progress[word] = p; saveProgress();
+  progress[pk(word)] = p; saveProgress();
 }
 loadProgress();
 
 // ---------- setup UI ----------
-const $ = id => document.getElementById(id);
-const POOLS = [
-  { id:"all", label:"All words", fn:() => WORDS },
-  { id:"learning", label:"Not right yet", fn:() => WORDS.filter(x => progress[x.w]?.last !== "r") },
-  { id:"missed", label:"Missed last time", fn:() => WORDS.filter(x => progress[x.w]?.last === "w") },
-  { id:"p1", label:"Page 1", fn:() => WORDS.filter(x => x.page === 1) },
-  { id:"p2", label:"Page 2", fn:() => WORDS.filter(x => x.page === 2) },
-  { id:"p3", label:"Page 3", fn:() => WORDS.filter(x => x.page === 3) },
-  { id:"p4", label:"Page 4", fn:() => WORDS.filter(x => x.page === 4) },
-];
+function pools(){
+  const ps = [
+    { id:"all", label:"All words", fn:() => WORDS },
+    { id:"learning", label:"Not right yet", fn:() => WORDS.filter(x => last(x.w) !== "r") },
+    { id:"missed", label:"Missed last time", fn:() => WORDS.filter(x => last(x.w) === "w") },
+  ];
+  if (WORDS.some(x => x.challenge)){
+    ps.push({ id:"regular", label:"Regular words", fn:() => WORDS.filter(x => !x.challenge) });
+    ps.push({ id:"challenge", label:"Challenge words", fn:() => WORDS.filter(x => x.challenge) });
+  }
+  for (let i = 1; i <= list.pages; i++) ps.push({ id:"p"+i, label:"Page "+i, fn:() => WORDS.filter(x => x.page === i) });
+  return ps;
+}
 const SIZES = [["10","10"],["20","20"],["50","50"],["all","All"]];
 const ORDERS = [["shuffle","Mixed up"],["list","List order"]];
-let prefs = { pool:"learning", size:"20", order:"shuffle", voice:"", rate:0.85 };
-try { Object.assign(prefs, JSON.parse(localStorage.getItem(KEY+"-prefs") || "{}")); } catch(e){}
-function savePrefs(){ try { localStorage.setItem(KEY+"-prefs", JSON.stringify(prefs)); } catch(e){} }
 
 function chipGroup(el, name, items, current, onPick){
   el.innerHTML = "";
@@ -590,18 +693,37 @@ function chipGroup(el, name, items, current, onPick){
     el.appendChild(wrap);
   });
 }
+function switchList(id){
+  list = LISTS.find(l => l.id === id) || LISTS[0];
+  WORDS = list.words; prefs.list = list.id;
+  if (!pools().some(p => p.id === prefs.pool)) prefs.pool = "all";
+  savePrefs(); renderSetup();
+}
 function renderSetup(){
-  const right = WORDS.filter(x => progress[x.w]?.last === "r").length;
-  const miss = WORDS.filter(x => progress[x.w]?.last === "w").length;
-  $("stats").innerHTML = `<div><b>${WORDS.length}</b><span class="hint">words on the list</span></div>
+  // list tabs
+  $("listTabs").hidden = LISTS.length < 2;
+  $("listTabs").innerHTML = LISTS.map(l => `<button type="button" role="tab" aria-selected="${l.id===list.id}" data-list="${l.id}">${l.tab}<small>${l.words.length} words</small></button>`).join("");
+  $("listTabs").querySelectorAll("button").forEach(b => b.addEventListener("click", () => switchList(b.dataset.list)));
+  $("eyebrow").textContent = list.eyebrow;
+  $("startBtn").textContent = list.start;
+  $("parentSummary").textContent = `For parents: ${list.tab} word list and results`;
+  // stats for this list
+  const tried = WORDS.filter(x => last(x.w)).length;
+  const right = WORDS.filter(x => last(x.w) === "r").length;
+  const miss = WORDS.filter(x => last(x.w) === "w").length;
+  $("stats").innerHTML = `<div><b>${WORDS.length}</b><span class="hint">words on this list</span></div>
+    <div><b>${tried}</b><span class="hint">practiced so far</span></div>
     <div><b style="color:var(--good)">${right}</b><span class="hint">right last time</span></div>
     <div><b style="color:var(--bad)">${miss}</b><span class="hint">missed last time</span></div>`;
-  chipGroup($("poolChips"), "pool", POOLS.map(p => [p.id, p.label, p.fn().length]), prefs.pool, v => { prefs.pool=v; savePrefs(); });
+  $("statsNote").textContent = tried ? "These numbers update after every word Levi answers." : "No results yet. They fill in as Levi practices.";
+  const ps = pools();
+  if (!ps.some(p => p.id === prefs.pool)) prefs.pool = "all";
+  chipGroup($("poolChips"), "pool", ps.map(p => [p.id, p.label, p.fn().length]), prefs.pool, v => { prefs.pool=v; savePrefs(); });
   chipGroup($("sizeChips"), "size", SIZES, prefs.size, v => { prefs.size=v; savePrefs(); });
   chipGroup($("orderChips"), "order", ORDERS, prefs.order, v => { prefs.order=v; savePrefs(); });
   $("wordlist").innerHTML = WORDS.map(x => {
-    const l = progress[x.w]?.last;
-    return `<li><span>${x.w}</span>${l==="r"?'<span class="r">✓</span>':l==="w"?'<span class="w">✗</span>':""}</li>`;
+    const l = last(x.w);
+    return `<li><span>${x.w}${x.challenge ? ' <small class="hint">(challenge)</small>' : ""}</span>${l==="r"?'<span class="r">✓</span>':l==="w"?'<span class="w">✗</span>':""}</li>`;
   }).join("");
 }
 
@@ -842,9 +964,9 @@ function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt
 function clearAdvance(){ clearTimeout(advanceTimer); advanceTimer = null; }
 function setStatus(t){ $("status").textContent = t; }
 
-function startRound(list){
-  if (!list.length) return;
-  round = list; idx = 0; results = [];
+function startRound(items){
+  if (!items.length) return;
+  round = items; idx = 0; results = [];
   show("drill"); keepAwake(); present();
 }
 function present(){
@@ -962,7 +1084,7 @@ function finish(){
   $("missBlock").hidden = missed.length === 0;
   $("missList").innerHTML = missed.map(w => `<li>${esc(w)}</li>`).join("");
   $("redoMissed").hidden = missed.length === 0;
-  $("redoMissed").onclick = () => { unlockSpeech(); startRound(shuffle(missed.map(w => byWord[w]))); };
+  $("redoMissed").onclick = () => { unlockSpeech(); startRound(shuffle(missed.map(w => WORDS.find(x => x.w === w)))); };
   show("summary");
 }
 function backToStart(){ stopSpeech(); abortListening(); releaseAwake(); renderSetup(); renderModes(); show("setup"); }
@@ -972,14 +1094,14 @@ $("backBtn").addEventListener("click", backToStart);
 function unlockSpeech(){ if (synth){ const u = new SpeechSynthesisUtterance(" "); u.volume = 0; synth.speak(u); } }
 
 $("startBtn").addEventListener("click", async () => {
-  let list = POOLS.find(p => p.id === prefs.pool).fn();
-  if (!list.length){
+  let words = pools().find(p => p.id === prefs.pool).fn();
+  if (!words.length){
     $("startBtn").textContent = prefs.pool === "missed" ? "No missed words yet. Pick another set." : "Nothing left here. Pick another set.";
-    setTimeout(() => $("startBtn").textContent = "Start the bee", 2600);
+    setTimeout(() => $("startBtn").textContent = list.start, 2600);
     return;
   }
-  if (prefs.order === "shuffle") list = shuffle(list);
-  if (prefs.size !== "all") list = list.slice(0, +prefs.size);
+  if (prefs.order === "shuffle") words = shuffle(words);
+  if (prefs.size !== "all") words = words.slice(0, +prefs.size);
   unlockSpeech();
   mode = prefs.mode;
   $("turnText").innerHTML = mode === "voice"
@@ -995,15 +1117,18 @@ $("startBtn").addEventListener("click", async () => {
       $("turnText").innerHTML = "<strong>The microphone isn't available here, so Levi checks himself.</strong> Spell it out loud, then tap Show the word.";
     }
   }
-  startRound(list);
+  startRound(words);
 });
 
 $("resetBtn").addEventListener("click", () => $("resetConfirm").hidden = false);
 $("resetNo").addEventListener("click", () => $("resetConfirm").hidden = true);
 $("resetYes").addEventListener("click", () => {
-  try { localStorage.removeItem(KEY); } catch(e){}
-  loadProgress(); $("resetConfirm").hidden = true; renderSetup();
+  Object.keys(progress).forEach(k => { if (k.startsWith(list.id + ":")) delete progress[k]; });
+  saveProgress(); $("resetConfirm").hidden = true; renderSetup();
 });
 
 renderSetup();
 </script>
+
+</body>
+</html>
