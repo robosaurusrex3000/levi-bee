@@ -125,7 +125,7 @@ button:disabled{opacity:.5;cursor:default}
   .setup-grid{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);align-items:start}
   .pair{grid-template-columns:1fr 1fr}
   #setup .btn-main{font-size:1.5rem;padding:18px 24px}
-  .stage{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);align-items:center;gap:40px;padding:40px 44px;min-height:min(540px,calc(100vh - 190px))}
+  .stage{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);align-items:center;gap:40px;padding:40px 44px;min-height:min(540px,calc(100vh - 330px))}
   .stage-left{border-right:1px solid var(--line);padding-right:40px;align-self:stretch;justify-content:center}
   .speaker{width:190px;height:190px}
   .speaker svg{width:84px;height:84px}
@@ -134,6 +134,63 @@ button:disabled{opacity:.5;cursor:default}
   .tiles span{width:2.5rem;height:2.9rem;font-size:1.55rem}
   #summary .panel{max-width:760px}
 }
+
+/* space journey (a deliberately dark "space" band in both themes) */
+:root{--space:#0E1530;--space-2:#1A2450;--space-line:#2A3670;--space-ink:#EEF2FF;--space-muted:#A9B4D8;--flame:#FFB020}
+.journey{background:var(--space);color:var(--space-ink);border-radius:18px;padding:14px 18px 12px;display:flex;flex-direction:column;gap:10px;border:1px solid var(--space-line)}
+.journey-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.rank-badge{width:48px;height:48px;border-radius:50%;background:var(--space-2);display:grid;place-items:center;font-size:1.6rem;flex:none;box-shadow:0 0 0 2px var(--flame)}
+.rank-text{flex:1 1 180px;min-width:0}
+.eyebrow.on-space{color:var(--space-muted)}
+.rank-name{font-family:var(--display);font-weight:800;font-size:1.4rem;line-height:1.1}
+.rank-next{color:var(--space-muted);font-size:.92rem;margin-left:auto;text-align:right}
+.track{--p:0;position:relative;height:48px;border-radius:12px;overflow:hidden;background-color:var(--space-2);
+  background-image:radial-gradient(circle,rgba(255,255,255,.75) 1px,transparent 1.6px),radial-gradient(circle,rgba(255,255,255,.35) 1px,transparent 1.6px);
+  background-size:41px 23px,57px 31px;background-position:3px 4px,19px 13px}
+.trail{position:absolute;left:0;top:50%;height:4px;margin-top:-2px;border-radius:2px;width:calc((100% - 64px) * var(--p) + 18px);background:linear-gradient(90deg,transparent,var(--flame));transition:width 1.4s cubic-bezier(.3,.7,.3,1)}
+.marks{position:absolute;inset:0}
+.mk{position:absolute;top:50%;left:calc((100% - 64px) * var(--t) + 32px);width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;border:2px solid var(--space-muted);background:var(--space-2)}
+.mk.on{background:var(--flame);border-color:var(--flame)}
+.mk.last{width:22px;height:22px;margin:-11px 0 0 -11px;display:grid;place-items:center;font-size:.8rem;border-color:var(--flame)}
+.rocket{position:absolute;top:50%;left:calc((100% - 64px) * var(--p));transform:translateY(-50%);transition:left 1.4s cubic-bezier(.3,.7,.3,1);line-height:0;filter:drop-shadow(0 0 6px rgba(255,176,32,.35))}
+.rocket .flame{transform-origin:15px 18px}
+.rocket.boost .flame{animation:flick .12s linear infinite alternate}
+@keyframes flick{to{transform:scaleX(1.5)}}
+.ladder summary{color:var(--space-muted);font-size:.9rem}
+.ladder ol{margin:10px 0 2px;padding-left:1.6em;columns:3 13rem;column-gap:24px;font-size:.92rem;color:var(--space-muted)}
+.ladder li{break-inside:avoid;padding:2px 0}
+.ladder li.on{color:var(--space-ink)}
+.ladder li.now{color:var(--flame);font-weight:600}
+.ladder li small{opacity:.75;font-variant-numeric:tabular-nums}
+details.ladder{border-top:1px solid var(--space-line);padding-top:8px}
+
+/* rank-up celebration */
+.rankup{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:rgba(6,10,28,.72)}
+.rankup-card{background:var(--space);color:var(--space-ink);border:1px solid var(--space-line);border-radius:24px;padding:32px 28px;max-width:440px;width:100%;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;animation:pop .45s cubic-bezier(.2,1.4,.4,1)}
+.rankup-card h2{font-size:2rem}
+.rankup-card p:not(.eyebrow){color:var(--space-muted)}
+.rankup-icon{font-size:4.6rem;line-height:1.1}
+.rankup-card .btn-main{margin-top:8px;min-width:220px}
+@keyframes pop{from{transform:scale(.6);opacity:0}}
+.burst{position:fixed;inset:0;pointer-events:none;z-index:60}
+.burst i{position:absolute;width:14px;height:14px;clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);animation:fly 1.1s cubic-bezier(.2,.7,.4,1) forwards}
+@keyframes fly{to{transform:translate(var(--dx),var(--dy)) rotate(var(--r)) scale(.5);opacity:0}}
+@media (prefers-reduced-motion: reduce){.rocket,.trail{transition:none}.rocket.boost .flame,.rankup-card{animation:none}.burst{display:none}}
+
+/* typing */
+.type-area{display:flex;flex-direction:column;gap:14px;width:100%;max-width:580px}
+.answer{min-height:66px;border:2px solid var(--line);border-radius:14px;background:var(--surface-2);display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:5px;padding:10px}
+.answer span.l{font-family:var(--word);font-weight:700;font-size:1.4rem;width:2.1rem;height:2.6rem;display:grid;place-items:center;border-radius:8px;background:var(--surface);border:1.5px solid var(--accent);text-transform:uppercase}
+.answer .ph{color:var(--muted)}
+.answer .caret{width:3px;height:2.2rem;background:var(--accent);border-radius:2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+@media (prefers-reduced-motion: reduce){.answer .caret{animation:none}}
+.kbd{display:flex;flex-direction:column;gap:6px}
+.kbd .r{display:flex;gap:6px;justify-content:center}
+.kbd button{flex:1 1 0;min-width:0;max-width:54px;min-height:54px;padding:0;font-family:var(--word);font-size:1.35rem;font-weight:700;text-transform:uppercase;border-radius:10px}
+.kbd button:active{transform:translateY(1px);background:var(--accent-soft)}
+.kbd .k-wide{max-width:none;flex:1.5 1 0;font-family:var(--body);font-size:1rem;text-transform:none}
+.kbd .k-check{max-width:none;flex:2.6 1 0;background:var(--good);border-color:var(--good);color:#fff;font-family:var(--display);font-size:1.3rem;text-transform:none}
 
 /* summary */
 .score{font-family:var(--display);font-weight:800;font-size:3rem;line-height:1}
@@ -165,6 +222,26 @@ summary{cursor:pointer;font-weight:600}
     </div>
     <div class="tabs" id="listTabs" role="tablist" aria-label="Word lists" hidden></div>
   </header>
+
+  <section class="journey" id="journey" aria-label="Levi's space journey">
+    <div class="journey-head">
+      <div class="rank-badge" id="rankIcon" aria-hidden="true"></div>
+      <div class="rank-text">
+        <p class="eyebrow on-space">Levi's rank</p>
+        <p class="rank-name" id="rankName"></p>
+      </div>
+      <p class="rank-next" id="rankNext"></p>
+    </div>
+    <div class="track" id="track">
+      <div class="trail"></div>
+      <div class="marks" id="marks"></div>
+      <div class="rocket" id="rocket"><svg viewBox="0 0 64 36" width="64" height="36" aria-hidden="true"><path class="flame" d="M15 18 L1 11 Q6 18 1 25 Z" fill="#FF8A1F"/><path class="flame" d="M15 18 L6 14 Q9 18 6 22 Z" fill="#FFD54A"/><path d="M21 11 L13 2 L28 11 Z" fill="#E5484D"/><path d="M21 25 L13 34 L28 25 Z" fill="#E5484D"/><path d="M18 11 H44 Q57 13.5 62 18 Q57 22.5 44 25 H18 Q14.5 18 18 11 Z" fill="#F4F6FB"/><path d="M45 11.2 Q57 13.5 62 18 Q57 22.5 45 24.8 Z" fill="#E5484D"/><circle cx="35" cy="18" r="4.3" fill="#5EA2FF" stroke="#16233F" stroke-width="1.6"/></svg></div>
+    </div>
+    <details class="ladder">
+      <summary>See every rank</summary>
+      <ol id="ladder"></ol>
+    </details>
+  </section>
 
   <div id="noSpeech" class="notice" hidden>This browser can't read words aloud. Try Chrome, Edge, or Safari on a laptop, tablet, or phone.</div>
 
@@ -274,6 +351,10 @@ summary{cursor:pointer;font-weight:600}
           <button id="againWord" type="button">Hear the word</button>
           <button id="againSentence" type="button">Hear the sentence</button>
         </div>
+        <div id="typeArea" class="type-area" hidden>
+          <div class="answer" id="answerBox" aria-live="polite" aria-label="Your spelling"></div>
+          <div class="kbd" id="kbd"></div>
+        </div>
         <button id="doneBtn" class="btn-main wide" type="button" hidden>I'm done spelling</button>
         <button id="micBtn" class="btn-main wide" type="button" hidden>Tap, then spell it</button>
         <button id="showBtn" class="btn-main wide" type="button" hidden>Show the word</button>
@@ -319,6 +400,17 @@ summary{cursor:pointer;font-weight:600}
     </div>
   </section>
 </div>
+
+<div class="rankup" id="rankup" hidden role="dialog" aria-modal="true" aria-labelledby="rankupTitle">
+  <div class="rankup-card">
+    <div class="rankup-icon" id="rankupIcon" aria-hidden="true"></div>
+    <p class="eyebrow on-space">Rank up!</p>
+    <h2 id="rankupTitle"></h2>
+    <p id="rankupSub"></p>
+    <button id="rankupBtn" class="btn-main" type="button">Keep going</button>
+  </div>
+</div>
+<div class="burst" id="burst" aria-hidden="true"></div>
 
 <script>
 const RAW = [
@@ -600,6 +692,27 @@ RAW.forEach((block, i) => block.split("\n").forEach(line => {
 // Weekly class spelling lists: { id, name, words: "word|sentence" lines }
 // A "*" before a word marks it as a challenge word.
 const WEEKLY = [
+  { id:"wk-2026-10-12", name:"Oct. 12-16", words:`
+group|Our group built a model volcano together.
+discuss|Let's discuss the story after we finish reading.
+raccoon|A raccoon knocked over our trash can last night.
+grew|My little sister grew two inches this year.
+suffer|Plants suffer when they don't get enough water.
+proof|The muddy footprints were proof that the dog came inside.
+value|This old coin has a high value.
+puppet|I made a sock puppet with button eyes.
+suit|Dad wore a suit and tie to the wedding.
+unit|We are starting a new unit about the solar system.
+salute|The soldiers salute the flag.
+summit|The hikers reached the summit of the mountain.
+nephew|My aunt took her nephew to the zoo.
+rescue|The lifeguard swam out to rescue the swimmer.
+scuba|Scuba divers carry tanks of air on their backs.
+youth|The youth group meets every Wednesday night.
+problem|We worked together to solve the problem.
+suppose|I suppose it will rain later today.
+*canoe|We paddled the canoe across the lake.
+*shoes|Put on your shoes before we go outside.` },
   { id:"wk-2026-10-05", name:"Oct. 5-9", words:`
 shown|The teacher has shown us how to solve the problem.
 common|Robins are a common bird in our backyard.
@@ -686,6 +799,81 @@ function mark(word, ok){
 }
 loadProgress();
 
+// ---------- space journey ----------
+// Each rank is earned by spelling more words right (each word counts once, the first time it's right).
+const BEE_RANKS = [
+  ["🧪","Junior Scientist"],["🔬","Lab Scientist"],["🔧","Rocket Engineer"],["🎖️","Air Force Cadet"],
+  ["✈️","Air Force Pilot"],["🛩️","Jet Squadron Leader"],["⚡","Test Pilot"],["🪂","Astronaut Trainee"],
+  ["👨‍🚀","Astronaut"],["🌍","Spacewalker"],["🛰️","Space Station Commander"],["🌙","Moon Explorer"],
+  ["🏕️","Moon Base Chief"],["🔴","Mars Pioneer"],["🏛️","Mars Colony Governor"],["☄️","Asteroid Miner"],
+  ["🪐","Jupiter Voyager"],["💫","Saturn Ring Ranger"],["🚀","Starship Captain"],["⭐","Fleet Admiral"],
+  ["🌠","Nebula Navigator"],["🌟","Star System Ambassador"],["🛡️","Galaxy Defender"],["📜","Galactic Senator"],
+  ["🏅","Galactic Grand Admiral"],["✨","Supreme Star Commander"],["👑","Galactic Emperor","the"]
+];
+const WEEK_RANKS = [
+  ["🔩","Launch Pad Rookie"],["⏱️","Countdown Crew Member"],["🔥","Liftoff Leader"],["☁️","Cloud Buster"],
+  ["🌍","Orbit Rider"],["🌙","Moon Hopper"],["🔴","Mars Racer"],["🪐","Ring Rider"],
+  ["☄️","Comet Chaser"],["🌟","Star Captain"],["🏆","Spelling Superstar"]
+];
+const ranks = () => list.id === "bee" ? BEE_RANKS : WEEK_RANKS;
+const stepSize = () => Math.max(1, Math.floor(WORDS.length / (ranks().length - 1)));
+const threshold = i => i === ranks().length - 1 ? WORDS.length : i * stepSize();
+const rightCount = () => WORDS.filter(x => (progress[pk(x.w)]?.r || 0) > 0).length;
+function rankIndex(n){ let r = 0; ranks().forEach((_, i) => { if (n >= threshold(i)) r = i; }); return r; }
+const article = (i) => { const [ , name, art] = ranks()[i]; return art || (/^[aeiou]/i.test(name) ? "an" : "a"); };
+function renderJourney(animate){
+  const n = rightCount(), N = WORDS.length, R = ranks(), r = rankIndex(n);
+  $("rankIcon").textContent = R[r][0];
+  $("rankName").textContent = R[r][1];
+  $("rankNext").textContent = r === R.length - 1
+    ? `All ${N} words spelled right!`
+    : `${n} of ${N} words · ${threshold(r+1) - n} more to become ${article(r+1)} ${R[r+1][1]}`;
+  $("track").style.setProperty("--p", N ? n / N : 0);
+  $("marks").innerHTML = R.map((x, i) => i === 0 ? "" :
+    `<span class="mk${n >= threshold(i) ? " on" : ""}${i === R.length-1 ? " last" : ""}" style="--t:${threshold(i)/N}" title="${x[1]} at ${threshold(i)} words">${i === R.length-1 ? x[0] : ""}</span>`).join("");
+  $("ladder").innerHTML = R.map((x, i) =>
+    `<li class="${i < r ? "on" : i === r ? "now" : ""}">${x[0]} ${x[1]} <small>${threshold(i)} words</small></li>`).join("");
+  if (animate){
+    const rk = $("rocket"); rk.classList.add("boost");
+    setTimeout(() => rk.classList.remove("boost"), 1500);
+  }
+}
+function burst(fromEl, count = 22){
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const b = fromEl.getBoundingClientRect(), cx = b.left + b.width/2, cy = b.top + b.height/2;
+  const colors = ["#FFB020","#FFD54A","#5EA2FF","#4CC38A","#F07A70","#C58CFF"];
+  for (let i = 0; i < count; i++){
+    const el = document.createElement("i");
+    const a = Math.random() * Math.PI * 2, d = 90 + Math.random() * 160;
+    el.style.left = cx + "px"; el.style.top = cy + "px";
+    el.style.background = colors[i % colors.length];
+    el.style.setProperty("--dx", Math.cos(a) * d + "px");
+    el.style.setProperty("--dy", Math.sin(a) * d + "px");
+    el.style.setProperty("--r", (Math.random() * 540 - 270) + "deg");
+    $("burst").appendChild(el);
+    setTimeout(() => el.remove(), 1200);
+  }
+}
+let rankupNext = null;
+function showRankUp(r, then){
+  const R = ranks();
+  rankupNext = then;
+  $("rankupIcon").textContent = R[r][0];
+  $("rankupTitle").textContent = `You're now ${article(r)} ${R[r][1]}!`;
+  $("rankupSub").textContent = r === R.length - 1
+    ? `Every word on the list spelled right. Amazing work, Levi!`
+    : `${rightCount()} words spelled right. Next stop: ${R[r+1][1]}.`;
+  $("rankup").hidden = false;
+  $("rankupBtn").focus({ preventScroll:true });
+  burst($("rankupIcon"), 40);
+  speak([`Rank up! You are now ${article(r)} ${R[r][1]}!`]);
+}
+function closeRankUp(){
+  if ($("rankup").hidden) return;
+  $("rankup").hidden = true;
+  const f = rankupNext; rankupNext = null; f?.();
+}
+
 // ---------- setup UI ----------
 function pools(){
   const ps = [
@@ -742,6 +930,7 @@ function renderSetup(){
   chipGroup($("poolChips"), "pool", ps.map(p => [p.id, p.label, p.fn().length]), prefs.pool, v => { prefs.pool=v; savePrefs(); });
   chipGroup($("sizeChips"), "size", SIZES, prefs.size, v => { prefs.size=v; savePrefs(); });
   chipGroup($("orderChips"), "order", ORDERS, prefs.order, v => { prefs.order=v; savePrefs(); });
+  renderJourney(false);
   $("wordlist").innerHTML = WORDS.map(x => {
     const l = last(x.w);
     return `<li><span>${x.w}${x.challenge ? ' <small class="hint">(challenge)</small>' : ""}</span>${l==="r"?'<span class="r">✓</span>':l==="w"?'<span class="w">✗</span>':""}</li>`;
@@ -955,20 +1144,57 @@ $("pause").addEventListener("input", e => { prefs.pause = +e.target.value; pause
 // ---------- modes ----------
 let voiceReady = !!SR;
 function renderModes(){
-  const items = [["voice", "It listens and checks"], ["self", "Levi checks himself"]];
-  if (!SR) prefs.mode = "self";
+  const items = [["voice", "Say it out loud"], ["type", "Type it"], ["self", "Levi checks himself"]];
+  if (!SR && (prefs.mode || "voice") === "voice") prefs.mode = "type";
   chipGroup($("modeChips"), "mode", items, prefs.mode || (SR ? "voice" : "self"), v => { prefs.mode = v; savePrefs(); renderModes(); });
   if (!SR) $("modeChips").querySelector('input[value="voice"]').disabled = true;
   $("micPanel").hidden = (prefs.mode || "voice") !== "voice" || !SR;
   $("modeNote").textContent = !SR
     ? "This browser can't listen for spelling. Open the page in Chrome on a laptop or computer for voice checking."
-    : (prefs.mode || "voice") === "voice"
-      ? "Levi says the word, spells it, and says it again. The page listens and tells him if he's right."
-      : "Levi taps to see the word and marks himself right or wrong.";
+    : ({
+        voice: "Levi says the word, spells it, and says it again. The page listens and tells him if he's right.",
+        type: "Levi hears the word, types it on the on-screen keyboard (or the computer keyboard), and presses Check.",
+        self: "Levi taps to see the word and marks himself right or wrong."
+      })[prefs.mode || "voice"];
 }
-if (!prefs.mode) prefs.mode = SR ? "voice" : "self";
+if (!prefs.mode) prefs.mode = SR ? "voice" : "type";
 renderModes();
 let mode = prefs.mode;
+
+// ---------- typing ----------
+let typed = "";
+(function buildKeyboard(){
+  const rows = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
+  $("kbd").innerHTML = rows.map(r => `<div class="r">${[...r].map(k => `<button type="button" data-k="${k}" aria-label="${k.toUpperCase()}">${k}</button>`).join("")}</div>`).join("")
+    + `<div class="r"><button type="button" class="k-wide" data-k="back">⌫ Delete</button><button type="button" class="k-check" data-k="enter">Check</button></div>`;
+  $("kbd").addEventListener("click", e => { const b = e.target.closest("button[data-k]"); if (b) typeKey(b.dataset.k); });
+})();
+function renderTyped(){
+  $("answerBox").innerHTML = typed
+    ? [...typed].map(c => `<span class="l">${esc(c)}</span>`).join("") + `<span class="caret"></span>`
+    : `<span class="caret"></span><span class="ph">Type the word</span>`;
+}
+function typeKey(k){
+  if (mode !== "type" || $("askArea").hidden || !$("rankup").hidden) return;
+  if (k === "back") typed = typed.slice(0, -1);
+  else if (k === "enter") return checkTyped();
+  else if (typed.length < 24) typed += k;
+  renderTyped();
+}
+function checkTyped(){
+  if (!typed) return;
+  stopSpeech();
+  reveal(typed.toLowerCase() === round[idx].w.toLowerCase(), typed);
+}
+document.addEventListener("keydown", e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (!$("rankup").hidden){ if (e.key === "Enter" || e.key === " "){ e.preventDefault(); closeRankUp(); } return; }
+  if (mode !== "type" || $("drill").hidden || $("askArea").hidden) return;
+  if (/^[a-zA-Z]$/.test(e.key)){ e.preventDefault(); typeKey(e.key.toLowerCase()); }
+  else if (e.key === "Backspace"){ e.preventDefault(); typeKey("back"); }
+  else if (e.key === "Enter"){ e.preventDefault(); typeKey("enter"); }
+});
+$("rankupBtn").addEventListener("click", closeRankUp);
 
 // ---------- drill ----------
 let round = [], idx = 0, results = [], retries = 0, advanceTimer = null;
@@ -996,6 +1222,8 @@ function present(){
   $("meter").style.width = `${(idx/round.length)*100}%`;
   $("askArea").hidden = false; $("revealArea").hidden = true;
   $("showBtn").hidden = mode !== "self";
+  $("typeArea").hidden = mode !== "type";
+  typed = ""; renderTyped();
   $("doneBtn").hidden = true; $("micBtn").hidden = true;
   readThenAnswer([`Your word is ${round[idx].w}.`, 700, round[idx].s, 700, `${cap(round[idx].w)}.`]);
 }
@@ -1007,7 +1235,7 @@ async function readThenAnswer(parts){
   const finished = await speak(parts);
   if (!finished || $("askArea").hidden) return;
   if (mode === "voice") startListening();
-  else setStatus("Your turn");
+  else setStatus(mode === "type" ? "Type the word" : "Your turn");
 }
 function startListening(){
   setStatus("Get ready…");
@@ -1049,17 +1277,18 @@ function reveal(ok, heard){
   $("tiles").innerHTML = [...cur.w].map(ch => `<span>${esc(ch)}</span>`).join("");
   const re = new RegExp(`\\b(${cur.w})\\b`, "i");
   $("sentence").innerHTML = esc(cur.s).replace(re, "<mark>$1</mark>");
-  const voiceMode = mode === "voice" && ok !== null;
+  const voiceMode = mode !== "self" && ok !== null;   // the page checked the answer (voice or typing)
   $("selfBtns").hidden = voiceMode; $("voiceBtns").hidden = !voiceMode;
   $("verdict").hidden = !voiceMode; $("heard").hidden = true;
   if (!voiceMode){ setStatus("Check your spelling"); return; }
   $("verdict").className = "verdict " + (ok ? "ok" : "no");
   $("verdict").textContent = ok ? "✓ Correct!" : "✗ Not quite";
-  $("misheardBtn").hidden = ok;
+  $("misheardBtn").hidden = ok || mode === "type";
   if (!ok && heard){
     $("heard").hidden = false;
-    $("heard").innerHTML = `I heard: <b>${esc(heard.toUpperCase().split("").join(" "))}</b>`;
+    $("heard").innerHTML = `${mode === "type" ? "You typed" : "I heard"}: <b>${esc(heard.toUpperCase().split("").join(" "))}</b>`;
   }
+  if (ok) burst($("verdict"));
   setStatus(ok ? "Great job!" : "Let's learn this one");
   if (ok){
     speak(["Correct!"]).then(done => { if (done) advanceTimer = setTimeout(() => answer(true), 900); });
@@ -1084,11 +1313,18 @@ $("spellBtn").addEventListener("click", () => { clearAdvance(); const w = round[
 function answer(ok){
   clearAdvance();
   const cur = round[idx];
+  const before = rightCount();
   mark(cur.w, ok); results.push({ w: cur.w, ok });
+  const after = rightCount();
   idx++;
-  if (idx < round.length) present(); else finish();
+  const next = () => { if (idx < round.length) present(); else finish(); };
+  if (after > before){
+    renderJourney(true);
+    if (rankIndex(after) > rankIndex(before)){ stopSpeech(); return showRankUp(rankIndex(after), next); }
+  }
+  next();
 }
-$("gotIt").addEventListener("click", () => answer(true));
+$("gotIt").addEventListener("click", () => { burst($("gotIt")); answer(true); });
 $("missed").addEventListener("click", () => answer(false));
 $("nextBtn").addEventListener("click", () => answer($("nextBtn").dataset.ok === "1"));
 $("misheardBtn").addEventListener("click", () => answer(true));
@@ -1125,9 +1361,11 @@ $("startBtn").addEventListener("click", async () => {
   if (prefs.size !== "all") words = words.slice(0, +prefs.size);
   unlockSpeech();
   mode = prefs.mode;
-  $("turnText").innerHTML = mode === "voice"
-    ? "<strong>Your turn:</strong> say the word, spell it, then say the word again. Speak clearly!"
-    : "<strong>Your turn:</strong> say the word, spell it, then say the word again.";
+  $("turnText").innerHTML = ({
+    voice: "<strong>Your turn:</strong> say the word, spell it, then say the word again. Speak clearly!",
+    type: "<strong>Your turn:</strong> type the word, then press <strong>Check</strong>.",
+    self: "<strong>Your turn:</strong> say the word, spell it, then say the word again."
+  })[mode];
   if (mode === "voice"){
     // Ask for the microphone once, up front
     try {
