@@ -943,7 +943,7 @@ if (!synth) { $("noSpeech").hidden = false; }
 let voices = [];
 function pickDefaultVoice(){
   const prefer = ["Samantha","Google US English","Microsoft Aria","Microsoft Jenny","Allison","Ava","Microsoft Zira"];
-  for (const name of prefer){ const v = voices.find(v => v.name.includes(name)); if (v) return v.name; }
+  for (const name of prefer){ const v = voices.find(v => v.name.includes(name) && /en[-_]US/i.test(v.lang)); if (v) return v.name; }
   return (voices.find(v => v.lang === "en-US") || voices[0] || {}).name || "";
 }
 function loadVoices(){
@@ -996,7 +996,8 @@ function setSpeaker(state){
   $("icoMic").style.display = state === "listening" ? "" : "none";
 }
 
-const LETTERS = {a:"ay",b:"bee",c:"see",d:"dee",e:"ee",f:"eff",g:"gee",h:"aitch",i:"eye",j:"jay",k:"kay",l:"el",m:"em",n:"en",o:"oh",p:"pee",q:"cue",r:"are",s:"ess",t:"tee",u:"you",v:"vee",w:"double you",x:"ex",y:"why",z:"zee"};
+// Spoken letter names. "ay" gets read like "eye" by many voices, so the letter A is written as a capital A.
+const LETTERS = {a:"A",b:"bee",c:"see",d:"dee",e:"ee",f:"eff",g:"gee",h:"aitch",i:"eye",j:"jay",k:"kay",l:"el",m:"em",n:"en",o:"oh",p:"pee",q:"cue",r:"are",s:"ess",t:"tee",u:"you",v:"vee",w:"double you",x:"ex",y:"why",z:"zee"};
 const spelledOut = w => [...w.toLowerCase()].map(c => LETTERS[c] || c).join(", ");
 const cap = w => w[0].toUpperCase() + w.slice(1);
 
